@@ -4,7 +4,7 @@ Este repositorio contiene el código y la documentación del proyecto de la asig
 
 El proyecto consiste en el desarrollo de un videojuego de luchas de criaturas fantásticas para la empresa simulada MetProg URJC S.L.
 
-## 👥 Miembros del Equipo (Escuadrón 12)
+## 👥 Miembros del Equipo
 El equipo está organizado de manera autogestionada con los siguientes roles:
 
 * **Ivo Hagemann Martinez**: Jefe de Proyectos y Analista programador
