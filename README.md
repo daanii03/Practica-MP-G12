@@ -11,7 +11,6 @@ El equipo está organizado de manera autogestionada con los siguientes roles:
 * **Daniel Marcos Serrano**: Ingeniero de desarrollo
 * **Héctor Moreno García**: QA (Aseguramiento de Calidad)
 * **Jaime Bergad Lario**: Ingeniero de desarrollo
-* **Marcos Laorga Sagaseta de Ilurdoz**: Analista funcional
 
 ## ⚔️ Descripción del Videojuego
 El sistema permite a los usuarios registrarse, gestionar personajes y retarse en combates. La aplicación cuenta con dos tipos de usuarios: administrador (operador) y jugador.
