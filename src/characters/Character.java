@@ -1,15 +1,29 @@
-package Characters;
+package characters;
+
+import equipment.Armor;
+import equipment.Weapon;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public abstract class Character {
+
+    // Attributes
+
     private String name;
-    private Weapon[] activeWeapons;
+    private List<Weapon> activeWeapons = new ArrayList<>();
     private Armor activeArmor;
     private int life;
     private int power;
     private int id;
     private SpecialSkill specialSkill;
     private Inventory inventory;
+    private List<Minion> minions = new ArrayList<>();
 
+    public Character(CharacterBuilder characterBuilder){
+
+    }
 
     // Setters
 
@@ -21,8 +35,8 @@ public abstract class Character {
         this.activeArmor = activeArmor;
     }
 
-    public void setActiveWeapons(Weapon[] activeWeapons) {
-        this.activeWeapons = activeWeapons;
+    public void setActiveWeapons(List<Weapon> activeWeapons) {
+        this.activeWeapons.addAll(activeWeapons);
     }
 
     public void setLife(int life){
@@ -47,12 +61,21 @@ public abstract class Character {
         this.id = id;
     }
 
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
+    }
+
+    public void setSpecialSkill(SpecialSkill specialSkill) {
+        this.specialSkill = specialSkill;
+    }
+
     // Getters
+
     public String getName(){
         return this.name;
     }
 
-    public Weapon[] getActiveWeapons(){
+    public List<Weapon> getActiveWeapons(){
         return this.activeWeapons;
     }
     public Armor getActiveArmor(){
@@ -70,6 +93,16 @@ public abstract class Character {
     public int getId(){
         return this.id;
     }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public SpecialSkill getSpecialSkill() {
+        return specialSkill;
+    }
+
+    // Methods
 
     public void increaseLife(int incrementLife){
         if(this.life + incrementLife <= 5){
@@ -102,7 +135,7 @@ public abstract class Character {
             this.power += power;
         }
         else {
-            throw new RuntimeException("El poder no puede ser mayor a 5.");
+            throw new RuntimeException("El poder no puede tener un valor mayor a 5.");
         }
     }
 
@@ -112,7 +145,21 @@ public abstract class Character {
 
         }
         else {
-            throw new RuntimeException("El poder no puede ser menor a 5.");
+            throw new RuntimeException("El poder no puede tener un valor menor a 0.");
         }
+    }
+
+    public abstract void useSpecialSkill();
+
+    public int checkGold(){
+        return this.inventory.getGold();
+    }
+
+    public void addMinion(Minion minion){
+        minions.add(minion);
+    }
+
+    public void selectSpecialSkill(){
+
     }
 }

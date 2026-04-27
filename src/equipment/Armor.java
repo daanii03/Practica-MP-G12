@@ -1,4 +1,4 @@
-package Characters;
+package equipment;
 
 public class Armor {
 }
