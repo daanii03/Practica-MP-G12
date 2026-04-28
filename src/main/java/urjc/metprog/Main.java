@@ -1,7 +1,7 @@
-package urjc.metprog;
+package main.java.urjc.metprog;
 
-import urjc.metprog.controllers.Application;
-import urjc.metprog.views.CliInterface;
+import main.java.urjc.metprog.controllers.Application;
+import main.java.urjc.metprog.views.CliInterface;
 
 public class Main {
     public static void main(String[] args){

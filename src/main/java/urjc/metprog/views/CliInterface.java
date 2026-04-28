@@ -1,7 +1,7 @@
-package urjc.metprog.views;
+package main.java.urjc.metprog.views;
 
 import java.util.List;
-import urjc.metprog.controllers.Application;
+import main.java.urjc.metprog.controllers.Application;
 
 public class CliInterface {
 

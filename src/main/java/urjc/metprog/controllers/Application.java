@@ -1,4 +1,4 @@
-package urjc.metprog.controllers;
+package main.java.urjc.metprog.controllers;
 
 public class Application {
     

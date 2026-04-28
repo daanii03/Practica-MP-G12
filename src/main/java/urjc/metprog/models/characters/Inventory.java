@@ -1,4 +1,4 @@
-package urjc.metprog.models.characters;
+package main.java.urjc.metprog.models.characters;
 
 public class Inventory {
     private int gold;
