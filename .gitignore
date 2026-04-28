@@ -28,6 +28,9 @@ replay_pid*
 
 out/
 
+.vscode/
+.agents/
+
 .idea/workspace.xml
 .idea/shelf/
 .idea/tasks/

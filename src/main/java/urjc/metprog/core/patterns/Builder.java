@@ -1,4 +1,4 @@
-package main.core.patterns;
+package urjc.metprog.core.patterns;
 
 public interface Builder<T> {
     T build();

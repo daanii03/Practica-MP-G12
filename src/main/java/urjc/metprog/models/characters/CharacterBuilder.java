@@ -1,8 +1,8 @@
-package main.characters;
+package urjc.metprog.models.characters;
 
-import main.core.patterns.Builder;
-import main.equipment.Armor;
-import main.equipment.Weapon;
+import urjc.metprog.core.patterns.Builder;
+import urjc.metprog.models.equipment.Armor;
+import urjc.metprog.models.equipment.Weapon;
 
 import java.util.ArrayList;
 import java.util.List;

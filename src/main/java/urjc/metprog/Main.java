@@ -1,4 +1,4 @@
-package main;
+package urjc.metprog;
 
 public class Main {
     public static void main(String[] args){
