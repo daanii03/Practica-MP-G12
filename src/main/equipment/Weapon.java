@@ -1,4 +1,4 @@
-package equipment;
+package main.equipment;
 
 public class Weapon {
 }

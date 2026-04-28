@@ -1,4 +1,4 @@
-package core.patterns;
+package main.core.patterns;
 
 public interface Builder<T> {
     T build();

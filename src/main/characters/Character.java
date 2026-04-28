@@ -1,7 +1,7 @@
-package characters;
+package main.characters;
 
-import equipment.Armor;
-import equipment.Weapon;
+import main.equipment.Armor;
+import main.equipment.Weapon;
 
 import java.util.ArrayList;
 import java.util.List;
