@@ -7,39 +7,39 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Desafio {
+public class Challenge {
 
     // Estado del desafío
 
-    public enum Estado {
-        PENDIENTE_VALIDACION,  
-        PUBLICADO,             
-        ACEPTADO,              
-        RECHAZADO              
+    public enum Status {
+        PENDING_VALIDATION,  
+        PUBLISHED,             
+        ACCEPTED,              
+        REJECTED              
     }
 
     private final Usuario challenger;       
     private final Usuario challenged;       
     private final int goldBet;              
-    private Estado estado;
+    private Status status;
     private final LocalDateTime createdAt;
     private Map<String, Integer> activeModifiers;
 
     // Constructor
 
-    public Desafio(Usuario challenger, Usuario challenged, int goldBet) {
-        validateDesafio(challenger, challenged, goldBet);
+    public Challenge(Usuario challenger, Usuario challenged, int goldBet) {
+        validateChallenge(challenger, challenged, goldBet);
         this.challenger      = challenger;
         this.challenged      = challenged;
         this.goldBet         = goldBet;
-        this.estado          = Estado.PENDIENTE_VALIDACION;
+        this.status          = Status.PENDING_VALIDATION;
         this.createdAt       = LocalDateTime.now();
         this.activeModifiers = new HashMap<>();
     }
 
     // Validaciones
 
-    private void validateDesafio(Usuario challenger, Usuario challenged, int goldBet) {
+    private void validateChallenge(Usuario challenger, Usuario challenged, int goldBet) {
         if (challenger == null || challenged == null) {
             throw new IllegalArgumentException("Los usuarios no pueden ser nulos.");
         }
@@ -80,8 +80,8 @@ public class Desafio {
         return goldBet; 
     }
 
-    public Estado getEstado() { 
-        return estado; 
+    public Status getStatus() { 
+        return status; 
     }
 
     public LocalDateTime getCreatedAt() { 
@@ -94,7 +94,7 @@ public class Desafio {
 
 
     public void validate(Map<String, Integer> modifiers) {
-        if (estado != Estado.PENDIENTE_VALIDACION) {
+        if (status != Status.PENDING_VALIDATION) {
             throw new IllegalStateException("El desafío no está en estado PENDIENTE_VALIDACION.");
         }
         if (!challenged.hasActiveEquipment()) {
@@ -104,21 +104,21 @@ public class Desafio {
             this.activeModifiers = modifiers;
         } else {
             this.activeModifiers = new HashMap<>();
-}
-        this.estado = Estado.PUBLICADO;
+        }
+        this.status = Status.PUBLISHED;
     }
 
 
     public void accept() {
-        if (estado != Estado.PUBLICADO) {
+        if (status != Status.PUBLISHED) {
             throw new IllegalStateException("El desafío no está publicado aún.");
         }
-        this.estado = Estado.ACEPTADO;
+        this.status = Status.ACCEPTED;
     }
 
 
     public void reject() {
-        if (estado != Estado.PUBLICADO) {
+        if (status != Status.PUBLISHED) {
             throw new IllegalStateException("El desafío no está publicado aún.");
         }
         int penalty = (int) Math.ceil(goldBet * 0.1);
@@ -130,12 +130,12 @@ public class Desafio {
         challengedCharacter.decreaseGold(actualPenalty);
         challenger.getCharacter().increaseGold(actualPenalty);
 
-        this.estado = Estado.RECHAZADO;
+        this.status = Status.REJECTED;
     }
 
     @Override
     public String toString() {
-        return String.format("Desafio[%s → %s | oro=%d | estado=%s | fecha=%s]",
-                challenger.getNick(), challenged.getNick(), goldBet, estado, createdAt);
+        return String.format("Challenge[%s → %s | gold=%d | status=%s | date=%s]",
+                challenger.getNick(), challenged.getNick(), goldBet, status, createdAt);
     }
 }
