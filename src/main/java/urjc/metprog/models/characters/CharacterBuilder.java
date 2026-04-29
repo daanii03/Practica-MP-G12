@@ -8,15 +8,17 @@ import java.util.List;
 
 public class CharacterBuilder {
 
+    // Attributes
+
     private String name;
-    private List<Weapon> activeWeapons = new ArrayList<>();
+    private final List<Weapon> activeWeapons = new ArrayList<>();
     private Armor activeArmor;
     private int life;
     private int power;
     private int id;
     private SpecialSkill specialSkill;
     private Inventory inventory;
-    private List<Minion> minions = new ArrayList<>();
+    private final List<Minion> minions = new ArrayList<>();
 
     // Getters
 
@@ -58,14 +60,13 @@ public class CharacterBuilder {
 
     // Setters
 
-
     public CharacterBuilder name(String name) {
         this.name = name;
         return this;
     }
 
-    public CharacterBuilder activeWeapons(List<Weapon> activeWeapons) {
-        this.activeWeapons = activeWeapons;
+    public CharacterBuilder addActiveWeapons(Weapon weapon) {
+        this.activeWeapons.add(weapon);
         return this;
     }
 
@@ -84,6 +85,10 @@ public class CharacterBuilder {
         return this;
     }
 
+    public CharacterBuilder id(int id){
+        this.id = id;
+        return this;
+    }
 
     public CharacterBuilder specialSkill(SpecialSkill specialSkill) {
         this.specialSkill = specialSkill;
@@ -95,9 +100,10 @@ public class CharacterBuilder {
         return this;
     }
 
-    public CharacterBuilder minions(List<Minion> minions) {
-        this.minions = minions;
+    public CharacterBuilder addMinions(Minion minions) {
+        this.minions.add(minions);
         return this;
     }
+
 
 }
