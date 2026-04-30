@@ -1,10 +1,16 @@
-package main.java.urjc.metprog.models.characters;
+package main.java.urjc.metprog.models.skills;
 
 public class SpecialSkill {
 
     private String name;
     private int attackValue;
     private int defenseValue;
+
+    public SpecialSkill(String name, int attackValue, int defenseValue) {
+        this.name = name;
+        this.attackValue = attackValue;
+        this.defenseValue = defenseValue;
+    }
 
     // Getters
 

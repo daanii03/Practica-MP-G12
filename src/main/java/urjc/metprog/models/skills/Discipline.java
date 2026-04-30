@@ -1,15 +1,13 @@
-package main.java.urjc.metprog.models.characters;
+package main.java.urjc.metprog.models.skills;
 
 public class Discipline extends SpecialSkill{
 
     private int bloodPointsCost;
 
     public Discipline(String name, int bloodPointsCost, int attack, int defense){
-        this.setName(name);
+        super(name,attack,defense);
         this.validateBloodPointsCost(bloodPointsCost);
         this.bloodPointsCost = bloodPointsCost;
-        this.setAttackValue(attack);
-        this.setDefenseValue(defense);
     }
 
     private void validateBloodPointsCost(int bloodPointsCost) {

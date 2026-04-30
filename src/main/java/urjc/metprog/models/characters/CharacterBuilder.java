@@ -2,6 +2,7 @@ package main.java.urjc.metprog.models.characters;
 
 import main.java.urjc.metprog.models.equipment.Armor;
 import main.java.urjc.metprog.models.equipment.Weapon;
+import main.java.urjc.metprog.models.skills.SpecialSkill;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,8 +2,9 @@ package main.java.urjc.metprog.models.factorys;
 
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.characters.CharacterBuilder;
-import main.java.urjc.metprog.models.characters.Discipline;
+import main.java.urjc.metprog.models.skills.Discipline;
 import main.java.urjc.metprog.models.characters.Vampire;
+import main.java.urjc.metprog.models.skills.DisciplineCatalogue;
 
 import java.util.Random;
 
@@ -14,7 +15,7 @@ public class VampireFactory extends CharacterFactory {
 
         CharacterBuilder characterBuilder = new CharacterBuilder();
 
-        Vampire.DisciplineCatalogue[] options = Vampire.DisciplineCatalogue.values();
+        DisciplineCatalogue[] options = DisciplineCatalogue.values();
 
         int randomIndex = new Random().nextInt(options.length);
 
