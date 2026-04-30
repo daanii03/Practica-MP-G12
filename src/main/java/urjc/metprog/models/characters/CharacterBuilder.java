@@ -65,7 +65,7 @@ public class CharacterBuilder {
         return this;
     }
 
-    public CharacterBuilder addActiveWeapons(Weapon weapon) {
+    public CharacterBuilder addActiveWeapon(Weapon weapon) {
         this.activeWeapons.add(weapon);
         return this;
     }
@@ -100,10 +100,8 @@ public class CharacterBuilder {
         return this;
     }
 
-    public CharacterBuilder addMinions(Minion minions) {
-        this.minions.add(minions);
+    public CharacterBuilder addMinion(Minion minion) {
+        this.minions.add(minion);
         return this;
     }
-
-
 }

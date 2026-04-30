@@ -22,7 +22,19 @@ public abstract class Character {
     private final List<Minion> minions = new ArrayList<>();
 
     public Character(CharacterBuilder characterBuilder){
-
+        this.name = characterBuilder.getName();
+        this.id = characterBuilder.getId();
+        this.setLife(characterBuilder.getLife());
+        this.setPower(characterBuilder.getPower());
+        this.activeArmor = characterBuilder.getActiveArmor();
+        this.specialSkill = characterBuilder.getSpecialSkill();
+        this.inventory = characterBuilder.getInventory();
+        if (characterBuilder.getActiveWeapons() != null) {
+            this.activeWeapons.addAll(characterBuilder.getActiveWeapons());
+        }
+        if (characterBuilder.getMinions() != null) {
+            this.minions.addAll(characterBuilder.getMinions());
+        }
     }
 
     // Setters
@@ -33,10 +45,6 @@ public abstract class Character {
 
     public void setActiveArmor(Armor activeArmor) {
         this.activeArmor = activeArmor;
-    }
-
-    public void setActiveWeapons(List<Weapon> activeWeapons) {
-        this.activeWeapons.addAll(activeWeapons);
     }
 
     public void setLife(int life){
@@ -55,6 +63,18 @@ public abstract class Character {
         else {
             throw new IllegalArgumentException("El poder debe estar entre 1 y 5");
         }
+    }
+
+    public void setMinions(List<Minion> minions){
+        this.minions.clear();
+        if (minions != null)
+            this.minions.addAll(minions);
+    }
+
+    public void setActiveWeapons(List<Weapon> weapons){
+        this.activeWeapons.clear();
+        if (weapons != null)
+            this.activeWeapons.addAll(weapons);
     }
 
     public void setId(int id) {
@@ -78,6 +98,7 @@ public abstract class Character {
     public List<Weapon> getActiveWeapons(){
         return this.activeWeapons;
     }
+
     public Armor getActiveArmor(){
         return this.activeArmor;
     }
@@ -101,6 +122,8 @@ public abstract class Character {
     public SpecialSkill getSpecialSkill() {
         return specialSkill;
     }
+
+    public List<Minion> getMinions(){ return this.minions; }
 
     // Methods
 
@@ -146,5 +169,4 @@ public abstract class Character {
     public void addMinion(Minion minion){
         minions.add(minion);
     }
-
 }
