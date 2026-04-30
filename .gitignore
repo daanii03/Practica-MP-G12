@@ -37,3 +37,8 @@ out/
 .idea/usage.statistics.xml
 .idea/dictionaries/
 .idea/runConfigurations/
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3

@@ -28,7 +28,12 @@ public class DatabaseManager {
         // Empezamos con un ID autoincremental como clave primaria.
         
         String sqlUsuarios = "CREATE TABLE IF NOT EXISTS usuarios ("
-                           + "id INTEGER PRIMARY KEY AUTOINCREMENT"
+                           + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                           + "nick TEXT NOT NULL UNIQUE, "
+                           + "name TEXT NOT NULL, "
+                           + "password TEXT NOT NULL, "
+                           + "num_reg INTEGER NOT NULL, "
+                           + "character_id INTEGER"
                            + ");";
                            
         String sqlPersonajes = "CREATE TABLE IF NOT EXISTS personajes ("
