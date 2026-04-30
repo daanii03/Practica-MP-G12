@@ -7,14 +7,16 @@ public class Application {
     // Aquí irían las instancias de otros controladores o gestores de la aplicación
     // Por ejemplo:
     // private UserManager userManager;
-    // private CharacterManager characterManager;
     // private CombatSystem combatSystem;
+    private CharacterManager characterManager;
 
     public Application() {
         // Inicialización de la lógica y de los distintos controladores
         // this.userManager = new UserManager();
-        // this.characterManager = new CharacterManager();
         // this.combatSystem = new CombatSystem();
+        
+        // TODO: Reemplazar null por la implementación concreta de CharacterDao cuando exista
+        this.characterManager = new CharacterManager(null);
     }
 
     // ==========================================
