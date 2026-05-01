@@ -1,7 +1,7 @@
 package main.java.urjc.metprog.models.challenge;
 
 import main.java.urjc.metprog.models.characters.Character;
-import main.java.urjc.metprog.models.users.Usuario;
+import main.java.urjc.metprog.models.user.User;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
