@@ -51,7 +51,6 @@ public class UserManager {
         }
     }
 
-    // --- Lógica interna ---
 
     private String generarNumeroRegistro() {
         // Formato LNNLL (Letra, Número, Número, Letra, Letra)
