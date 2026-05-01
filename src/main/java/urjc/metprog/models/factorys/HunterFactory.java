@@ -9,7 +9,36 @@ import main.java.urjc.metprog.models.skills.TalentCatalogue;
 
 import java.util.Random;
 
+/**
+ * Factoría concreta encargada de la creación de personajes de tipo {@link Hunter}.
+ * <p>
+ * Implementa la lógica específica para inicializar un Cazador, incluyendo la
+ * selección aleatoria de un talento desde el catálogo disponible.
+ * </p>
+ *
+ * @author Daniel Marcos Serrano
+ * @version 1.0
+ * @see CharacterFactory
+ */
+
 public class HunterFactory extends CharacterFactory {
+
+    /**
+     * Crea e inicializa una nueva instancia de {@link Hunter}.
+     * <p>
+     * El proceso de creación sigue los siguientes pasos:
+     * <ol>
+     *   <li>Instancia un {@link CharacterBuilder}.</li>
+     *   <li>Selecciona un talento aleatorio de {@link TalentCatalogue}.</li>
+     *   <li>Configura el personaje con valores predeterminados (Vida: 5, Poder: 5).</li>
+     *   <li>Asigna un inventario nuevo y vacío.</li>
+     * </ol>
+     * </p>
+     *
+     * @param id Identificador único para el cazador.
+     * @param name Nombre del cazador.
+     * @return Un nuevo objeto {@link Hunter} completamente configurado.
+     */
 
     @Override
     public Character createCharacter(int id, String name) {
