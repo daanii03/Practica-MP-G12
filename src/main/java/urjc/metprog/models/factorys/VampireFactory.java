@@ -2,6 +2,7 @@ package main.java.urjc.metprog.models.factorys;
 
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.characters.CharacterBuilder;
+import main.java.urjc.metprog.models.characters.Inventory;
 import main.java.urjc.metprog.models.skills.Discipline;
 import main.java.urjc.metprog.models.characters.Vampire;
 import main.java.urjc.metprog.models.skills.DisciplineCatalogue;
@@ -22,7 +23,7 @@ public class VampireFactory extends CharacterFactory {
         Discipline randomDiscipline = options[randomIndex].generateDiscipline();
 
         characterBuilder.id(id).name(name).specialSkill(randomDiscipline).life(5)
-                .power(5).inventory(null).activeArmor(null);
+                .power(5).inventory(new Inventory());
 
 
         return new Vampire(characterBuilder);

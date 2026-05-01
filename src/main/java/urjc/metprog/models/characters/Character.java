@@ -2,6 +2,8 @@ package main.java.urjc.metprog.models.characters;
 
 import main.java.urjc.metprog.models.equipment.Armor;
 import main.java.urjc.metprog.models.equipment.Weapon;
+import main.java.urjc.metprog.models.modifiers.Strength;
+import main.java.urjc.metprog.models.modifiers.Weakness;
 import main.java.urjc.metprog.models.skills.SpecialSkill;
 
 import java.util.ArrayList;
@@ -13,29 +15,37 @@ public abstract class Character {
     // Attributes
 
     private String name;
-    private final List<Weapon> activeWeapons = new ArrayList<>();
-    private Armor activeArmor;
     private int life;
     private int power;
     private int id;
     private SpecialSkill specialSkill;
     private Inventory inventory;
     private final List<Minion> minions = new ArrayList<>();
+    private final List<Weakness> weaknesses = new ArrayList<>();
+    private final List<Strength> strengths = new ArrayList<>();
 
     public Character(CharacterBuilder characterBuilder){
         this.name = characterBuilder.getName();
         this.id = characterBuilder.getId();
-        this.setLife(characterBuilder.getLife());
-        this.setPower(characterBuilder.getPower());
-        this.activeArmor = characterBuilder.getActiveArmor();
+        this.life = validateLife(characterBuilder.getLife());
+        this.power = validatePower(characterBuilder.getPower());
         this.specialSkill = characterBuilder.getSpecialSkill();
         this.inventory = characterBuilder.getInventory();
-        if (characterBuilder.getActiveWeapons() != null) {
-            this.activeWeapons.addAll(characterBuilder.getActiveWeapons());
-        }
-        if (characterBuilder.getMinions() != null) {
-            this.minions.addAll(characterBuilder.getMinions());
-        }
+        this.weaknesses.addAll(characterBuilder.getWeaknesses());
+        this.strengths.addAll(characterBuilder.getStrengths());
+        this.minions.addAll(characterBuilder.getMinions());
+    }
+
+    private static int validateLife(int life){
+        if (life < 0 || life > 5)
+            throw new IllegalArgumentException("La vida debe estar entre 0 y 5");
+        return life;
+    }
+
+    private static int validatePower(int power){
+        if (power < 1 || power > 5)
+            throw new IllegalArgumentException("El poder debe estar entre 1 y 5");
+        return power;
     }
 
     // Setters
@@ -44,26 +54,12 @@ public abstract class Character {
         this.name = name;
     }
 
-    public void setActiveArmor(Armor activeArmor) {
-        this.activeArmor = activeArmor;
+    public void setLife(int life){
+        this.life = validateLife(life);
     }
 
-    public void setLife(int life){
-        if(life >= 0 && life <= 5){
-            this.life = life;
-        }
-            else{
-                throw new IllegalArgumentException("La vida debe estar entre 0 y 5");
-            }
-        }
-
     public void setPower(int power){
-        if(power >= 1 && power <= 5){
-            this.power = power;
-        }
-        else {
-            throw new IllegalArgumentException("El poder debe estar entre 1 y 5");
-        }
+        this.power = validatePower(power);
     }
 
     public void setMinions(List<Minion> minions){
@@ -72,11 +68,6 @@ public abstract class Character {
             this.minions.addAll(minions);
     }
 
-    public void setActiveWeapons(List<Weapon> weapons){
-        this.activeWeapons.clear();
-        if (weapons != null)
-            this.activeWeapons.addAll(weapons);
-    }
 
     public void setId(int id) {
         this.id = id;
@@ -90,20 +81,13 @@ public abstract class Character {
         this.specialSkill = specialSkill;
     }
 
+
     // Getters
 
     public String getName(){
         return this.name;
     }
-
-    public List<Weapon> getActiveWeapons(){
-        return this.activeWeapons;
-    }
-
-    public Armor getActiveArmor(){
-        return this.activeArmor;
-    }
-
+    
     public int getLife(){
         return this.life;
     }
@@ -125,6 +109,14 @@ public abstract class Character {
     }
 
     public List<Minion> getMinions(){ return this.minions; }
+
+    public List<Weakness> getWeaknesses(){
+        return this.weaknesses;
+    }
+
+    public List<Strength> getStrengths(){
+        return this.strengths;
+    }
 
     // Methods
 
@@ -168,6 +160,15 @@ public abstract class Character {
     }
 
     public void addMinion(Minion minion){
-        minions.add(minion);
+        this.minions.add(minion);
     }
+
+    public void addWeakness(Weakness weakness){
+        this.weaknesses.add(weakness);
+    }
+
+    public void addStrength(Strength strength){
+        this.strengths.add(strength);
+    }
+
 }

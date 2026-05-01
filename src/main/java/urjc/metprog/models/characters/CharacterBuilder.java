@@ -2,9 +2,12 @@ package main.java.urjc.metprog.models.characters;
 
 import main.java.urjc.metprog.models.equipment.Armor;
 import main.java.urjc.metprog.models.equipment.Weapon;
+import main.java.urjc.metprog.models.modifiers.Strength;
+import main.java.urjc.metprog.models.modifiers.Weakness;
 import main.java.urjc.metprog.models.skills.SpecialSkill;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class CharacterBuilder {
@@ -12,27 +15,19 @@ public class CharacterBuilder {
     // Attributes
 
     private String name;
-    private final List<Weapon> activeWeapons = new ArrayList<>();
-    private Armor activeArmor;
     private int life;
     private int power;
     private int id;
     private SpecialSkill specialSkill;
     private Inventory inventory;
     private final List<Minion> minions = new ArrayList<>();
+    private final List<Weakness> weaknesses = new ArrayList<>();
+    private final List<Strength> strengths = new ArrayList<>();
 
     // Getters
 
     public String getName() {
         return name;
-    }
-
-    public List<Weapon> getActiveWeapons() {
-        return activeWeapons;
-    }
-
-    public Armor getActiveArmor() {
-        return activeArmor;
     }
 
     public int getLife() {
@@ -59,6 +54,14 @@ public class CharacterBuilder {
         return minions;
     }
 
+    public List<Weakness> getWeaknesses() {
+        return this.weaknesses;
+    }
+
+    public List<Strength> getStrengths(){
+        return this.strengths;
+    }
+
     // Setters
 
     public CharacterBuilder name(String name) {
@@ -66,15 +69,6 @@ public class CharacterBuilder {
         return this;
     }
 
-    public CharacterBuilder addActiveWeapon(Weapon weapon) {
-        this.activeWeapons.add(weapon);
-        return this;
-    }
-
-    public CharacterBuilder activeArmor(Armor activeArmor) {
-        this.activeArmor = activeArmor;
-        return this;
-    }
 
     public CharacterBuilder life(int life) {
         this.life = life;
@@ -105,4 +99,16 @@ public class CharacterBuilder {
         this.minions.add(minion);
         return this;
     }
+
+    public CharacterBuilder addWeakness(Weakness weakness){
+        this.weaknesses.add(weakness);
+        return this;
+    }
+
+    public CharacterBuilder addStrength(Strength strength){
+        this.strengths.add(strength);
+        return this;
+    }
+
+
 }

@@ -3,7 +3,7 @@ package main.java.urjc.metprog.models.skills;
 public enum DisciplineCatalogue {
     MORDISCO_LETAL("Mordisco Letal",1,2,1),
     SOMBRAS_OCULTAS("Sombras ocultas",2,3,2),
-    SANGRE_HERVIDA("Sangre hervida",3,4,1);
+    SANGRE_HERVIDA("Sangre hervida",3,3,1);
 
     private final String disciplineName;
     private final int disciplineBloodPoints;

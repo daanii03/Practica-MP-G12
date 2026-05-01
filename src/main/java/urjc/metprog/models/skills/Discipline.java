@@ -6,13 +6,13 @@ public class Discipline extends SpecialSkill{
 
     public Discipline(String name, int bloodPointsCost, int attack, int defense){
         super(name,attack,defense);
-        this.validateBloodPointsCost(bloodPointsCost);
-        this.bloodPointsCost = bloodPointsCost;
+        this.bloodPointsCost = validateBloodPointsCost(bloodPointsCost);
     }
 
-    private void validateBloodPointsCost(int bloodPointsCost) {
-        if (bloodPointsCost < 0 || bloodPointsCost > 10)
-            throw new IllegalArgumentException("El coste de sangre debe estar entre 0 y 10.");
+    private static int validateBloodPointsCost(int bloodPointsCost) {
+        if (bloodPointsCost < 1 || bloodPointsCost > 3)
+            throw new IllegalArgumentException("El coste de sangre debe estar entre 1 y 3.");
+        return bloodPointsCost;
     }
 
     // Getters
@@ -24,8 +24,7 @@ public class Discipline extends SpecialSkill{
     // Setters
 
     public void setBloodPointsCost(int bloodPointsCost){
-        if (this.bloodPointsCost <= 10 && this.bloodPointsCost >= 0)
-            this.bloodPointsCost = bloodPointsCost;
+        this.bloodPointsCost = validateBloodPointsCost(bloodPointsCost);
     }
 
 }

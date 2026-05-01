@@ -8,8 +8,15 @@ public class SpecialSkill {
 
     public SpecialSkill(String name, int attackValue, int defenseValue) {
         this.name = name;
-        this.attackValue = attackValue;
-        this.defenseValue = defenseValue;
+        this.attackValue = validateValue(attackValue);
+        this.defenseValue = validateValue(defenseValue);
+    }
+
+    private static int validateValue(int value){
+        if (value >= 1 && value <= 3){
+            return value;
+        }
+        throw new IllegalArgumentException("El valor debe estar entre 1 y 3.");
     }
 
     // Getters
@@ -34,10 +41,10 @@ public class SpecialSkill {
     }
 
     public void setAttackValue(int attackValue) {
-        this.attackValue = attackValue;
+        this.attackValue = validateValue(attackValue);
     }
 
     public void setDefenseValue(int defenseValue) {
-        this.defenseValue = defenseValue;
+        this.defenseValue = validateValue(defenseValue);
     }
 }
