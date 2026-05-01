@@ -1,5 +1,7 @@
 package main.java.urjc.metprog.models.characters;
 
+import main.java.urjc.metprog.models.minions.HumanMinion;
+import main.java.urjc.metprog.models.minions.Minion;
 import main.java.urjc.metprog.models.skills.Discipline;
 
 public class Vampire extends Character{
@@ -46,6 +48,13 @@ public class Vampire extends Character{
             return discipline.getAttackValue();
         }
         return 0;
+    }
+
+    @Override
+    public void addMinion(Minion minion){
+        if (minion instanceof HumanMinion)
+            throw new IllegalArgumentException("Los vampiros no pueden tener esbirros humanos");
+        super.addMinion(minion);
     }
 
     public int getBloodPoints(){

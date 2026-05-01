@@ -1,7 +1,6 @@
 package main.java.urjc.metprog.models.characters;
 
-import main.java.urjc.metprog.models.equipment.Armor;
-import main.java.urjc.metprog.models.equipment.Weapon;
+import main.java.urjc.metprog.models.minions.Minion;
 import main.java.urjc.metprog.models.modifiers.Strength;
 import main.java.urjc.metprog.models.modifiers.Weakness;
 import main.java.urjc.metprog.models.skills.SpecialSkill;

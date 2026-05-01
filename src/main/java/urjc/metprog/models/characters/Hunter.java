@@ -11,7 +11,7 @@ public class Hunter extends Character {
 
     private static int validateWill(int will){
         if (will < 0 || will > 3)
-            throw new IllegalArgumentException("El don debe estar entre 0 y 3");
+            throw new IllegalArgumentException("La voluntad debe estar entre 0 y 3");
         return will;
     }
 
