@@ -9,6 +9,7 @@ public class UserBuilder {
     private String password;
     private String RegistrationNumber;
     private Character character;
+    private int victories;
 
 
     // Getters
@@ -31,6 +32,10 @@ public class UserBuilder {
 
     public Character getCharacter() {
         return character;
+    }
+
+    public int getVictories() {
+        return victories;
     }
 
 
@@ -59,6 +64,11 @@ public class UserBuilder {
 
     public UserBuilder setCharacter(Character character) {
         this.character = character;
+        return this;
+    }
+
+    public UserBuilder setVictories(int victories) {
+        this.victories = victories;
         return this;
     }
     public User build(){

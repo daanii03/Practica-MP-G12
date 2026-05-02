@@ -8,6 +8,7 @@ public class User {
     private String password;
     private String registrationNumber; // Cambiado a String para el formato LNNLL
     private Character myCharacter;
+    private int victories;
 
     public User(UserBuilder userBuilder) {
         this.name = userBuilder.getName();
@@ -15,6 +16,7 @@ public class User {
         this.password = userBuilder.getPassword();
         this.registrationNumber = userBuilder.getRegistrationNumber();
         this.myCharacter = userBuilder.getCharacter();
+        this.victories = userBuilder.getVictories();
     }
 
     // Getters necesarios para guardar en la BD y para la lógica del sistema
@@ -24,4 +26,7 @@ public class User {
     public String getRegistrationNumber() { return registrationNumber; }
     public Character getCharacter() { return myCharacter; }
     public void setCharacter(Character character) { this.myCharacter = character; }
+    public int getVictories() { return victories; }
+    public void setVictories(int victories) { this.victories = victories; }
+    public void addVictory() { this.victories++; }
 }

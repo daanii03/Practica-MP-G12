@@ -11,7 +11,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void insertUser(User user) {
-        String sql = "INSERT INTO usuarios (nick, name, password, num_reg, character_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO usuarios (nick, name, password, num_reg, character_id, victories) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -25,6 +25,7 @@ public class UserDaoImpl implements UserDao {
             // aquí deberíamos guardar su ID. Por ahora, asumimos que el usuario
             // se crea sin personaje y se le asigna después, por lo que insertamos NULL.
             pstmt.setNull(5, java.sql.Types.INTEGER);
+            pstmt.setInt(6, user.getVictories());
             
             pstmt.executeUpdate();
             System.out.println("Usuario " + user.getNick() + " insertado correctamente en la base de datos.");
@@ -36,15 +37,16 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void updateUser(User user) {
-        // Actualizamos nombre y contraseña buscando al usuario por su nick (que es único)
-        String sql = "UPDATE usuarios SET name = ?, password = ? WHERE nick = ?";
+        // Actualizamos nombre, contraseña y victorias buscando al usuario por su nick (que es único)
+        String sql = "UPDATE usuarios SET name = ?, password = ?, victories = ? WHERE nick = ?";
         
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, user.getName());
             pstmt.setString(2, user.getPassword());
-            pstmt.setString(3, user.getNick());
+            pstmt.setInt(3, user.getVictories());
+            pstmt.setString(4, user.getNick());
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -94,6 +96,7 @@ public class UserDaoImpl implements UserDao {
                             .setNick(rs.getString("nick"))
                             .setPassword(rs.getString("password"))
                             .setRegistrationNumber(rs.getString("num_reg"))
+                            .setVictories(rs.getInt("victories"))
                             .build();
                 }
             }
