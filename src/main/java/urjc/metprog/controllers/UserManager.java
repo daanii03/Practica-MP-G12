@@ -141,14 +141,13 @@ public class UserManager {
      */
 
     private String createRecordNumber() {
+        String newNumber;
+        do {
+            newNumber = createRandomFormat();
 
-        String newNumber = createRandomFormat();
-        if (userDao.getUserByRegistrationNumber(newNumber) == null){
-            throw new RuntimeException("Usuario no existente");
-        }
+        } while (userDao.getUserByRegistrationNumber(newNumber) != null);
 
         return newNumber;
-
     }
 
 
