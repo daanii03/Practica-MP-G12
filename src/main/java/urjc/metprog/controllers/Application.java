@@ -1,6 +1,7 @@
 package main.java.urjc.metprog.controllers;
 
 import java.util.List;
+import main.java.urjc.metprog.dao.DatabaseManager;
 
 public class Application {
     
@@ -11,7 +12,21 @@ public class Application {
     private CharacterManager characterManager;
 
     public Application() {
-        // Inicialización de la lógica y de los distintos controladores
+        // El constructor ahora se deja limpio intencionadamente.
+        // Solo se usa para preparar el objeto en memoria.
+    }
+
+    /**
+     * Método encargado de inicializar todos los sistemas pesados,
+     * como la conexión a la base de datos y la instanciación de Gestores/DAOs.
+     */
+    public void init() {
+        System.out.println("Iniciando servicios y base de datos...");
+        
+        // 1. Inicializar infraestructura
+        DatabaseManager.createTables();
+        
+        // 2. Instanciar lógica de negocio
         // this.userManager = new UserManager();
         // this.combatSystem = new CombatSystem();
         
