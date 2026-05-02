@@ -32,7 +32,7 @@ public class DatabaseManager {
                            + "nick TEXT NOT NULL UNIQUE, "
                            + "name TEXT NOT NULL, "
                            + "password TEXT NOT NULL, "
-                           + "num_reg INTEGER NOT NULL, "
+                           + "num_reg TEXT NOT NULL, "
                            + "character_id INTEGER"
                            + ");";
                            
