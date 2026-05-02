@@ -105,4 +105,28 @@ public class UserDaoImpl implements UserDao {
         }
         return null;
     }
+
+    @Override
+    public User getUserByRegistrationNumber(String numReg) {
+        String sql = "SELECT * FROM usuarios WHERE num_reg = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, numReg);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new UserBuilder()
+                            .setName(rs.getString("name"))
+                            .setNick(rs.getString("nick"))
+                            .setPassword(rs.getString("password"))
+                            .setRegistrationNumber(rs.getString("num_reg"))
+                            .setVictories(rs.getInt("victories"))
+                            .build();
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al recuperar usuario por número de registro: " + e.getMessage());
+        }
+        return null;
+    }
 }

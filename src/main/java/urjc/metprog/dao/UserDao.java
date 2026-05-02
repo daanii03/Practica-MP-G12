@@ -7,4 +7,11 @@ public interface UserDao {
     void updateUser(User user);
     void deleteUser(String nick);
     User getUser(String nick);
+    /**
+     * Busca un usuario en la base de datos por su número de registro.
+     * @param numReg Número de registro a buscar.
+     * @return El objeto User si lo encuentra, o null si está libre.
+     */
+    User getUserByRegistrationNumber(String numReg);
 }
+
