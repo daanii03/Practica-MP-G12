@@ -25,7 +25,7 @@ public class CharacterDaoImpl implements CharacterDao {
             return;
         }
 
-        String sqlInsert = "INSERT INTO personajes (user_id, name, race, gold, special_skill) VALUES (?, ?, ?, ?, ?)";
+        String sqlInsert = "INSERT INTO personajes (user_id, name, race, gold, life, power, special_skill) VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sqlInsert, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -45,6 +45,10 @@ public class CharacterDaoImpl implements CharacterDao {
             // Oro (usando checkGold según la clase)
             pstmt.setInt(4, character.checkGold());
             
+            // Vida y poder
+            pstmt.setInt(5, character.getLife());
+            pstmt.setInt(6, character.getPower());
+            
             // Determinar habilidad especial
             String specialSkillType = "discipline"; // default fallback
             if (character.getSpecialSkill() instanceof Gift) {
@@ -52,7 +56,7 @@ public class CharacterDaoImpl implements CharacterDao {
             } else if (character.getSpecialSkill() instanceof Talent) {
                 specialSkillType = "talent";
             }
-            pstmt.setString(5, specialSkillType);
+            pstmt.setString(7, specialSkillType);
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -163,11 +167,13 @@ public class CharacterDaoImpl implements CharacterDao {
                     int id = rs.getInt("id");
                     String name = rs.getString("name");
                     String race = rs.getString("race");
+                    int life = rs.getInt("life");
+                    int power = rs.getInt("power");
                     String specialSkillType = rs.getString("special_skill");
                     
                     // ========================================================
-                    // MEDIDA TEMPORAL: Como la base de datos no almacena aún la vida,
-                    // el poder y los detalles de habilidades reales, ponemos valores 
+                    // MEDIDA TEMPORAL: Como la base de datos no almacena aún
+                    // los detalles de habilidades reales, ponemos valores 
                     // válidos por defecto para que el Builder de Java no lance 
                     // un IllegalArgumentException y cuelgue el programa.
                     // ========================================================
@@ -175,8 +181,8 @@ public class CharacterDaoImpl implements CharacterDao {
                     CharacterBuilder builder = new CharacterBuilder()
                             .id(id)
                             .name(name)
-                            .life(5)  // FIX TEMPORAL: La vida debe ser de 0 a 5
-                            .power(1); // FIX TEMPORAL: El poder debe ser de 1 a 5
+                            .life(life)
+                            .power(power);
                             
                     // FIX TEMPORAL: Instanciar habilidades vacías según el tipo
                     if ("werewolf".equalsIgnoreCase(race)) {

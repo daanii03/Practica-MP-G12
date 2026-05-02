@@ -42,6 +42,8 @@ public class DatabaseManager {
                              + "name TEXT NOT NULL, "
                              + "race TEXT NOT NULL CHECK(race IN ('werewolf', 'vampire', 'hunter')), "
                              + "gold INTEGER NOT NULL, "
+                             + "life INTEGER NOT NULL CHECK (life BETWEEN 0 AND 5), "
+                             + "power INTEGER NOT NULL CHECK (power BETWEEN 1 AND 5), "
                              // TODO: añadir columna para inventario
                              + "special_skill TEXT NOT NULL CHECK(special_skill IN ('discipline', 'gift', 'talent')), "
                              + "FOREIGN KEY(user_id) REFERENCES usuarios(id)"
