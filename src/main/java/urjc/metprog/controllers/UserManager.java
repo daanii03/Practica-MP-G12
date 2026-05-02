@@ -6,7 +6,8 @@ import main.java.urjc.metprog.models.user.UserBuilder;
 import java.util.Random;
 
 /**
- * Gestor de usuarios. Controla el registro, login, bajas y bloqueos de jugadores y operadores.
+ * Gestor de usuarios. Controla el registro, login, bajas y bloqueos de
+ * jugadores y operadores.
  */
 public class UserManager {
 
@@ -42,7 +43,8 @@ public class UserManager {
     }
 
     /**
-     * Registra un operador en el sistema. Los operadores no tienen número de registro.
+     * Registra un operador en el sistema. Los operadores no tienen número de
+     * registro.
      */
     public User signUpOperator(String name, String nick, String password) {
         if (password.length() < 8 || password.length() > 12) {
@@ -105,6 +107,7 @@ public class UserManager {
 
     /**
      * Bloquea a un usuario infractor.
+     * 
      * @param nick Nick del usuario a bloquear.
      */
     public void blockUser(String nick) {
@@ -120,6 +123,7 @@ public class UserManager {
 
     /**
      * Desbloquea a un usuario.
+     * 
      * @param nick Nick del usuario a desbloquear.
      */
     public void unblockUser(String nick) {
@@ -133,28 +137,25 @@ public class UserManager {
         }
     }
 
-
-
     /**
      * Genera un número de registro único (Formato LNNLL) comprobando
      * que no exista previamente en la base de datos.
      */
 
     private String createRecordNumber() {
-
+        // FIXME: Error de lógica detectado. El if debe comprobar que el número NO sea null
+        // (es decir, que ya exista) para lanzar error o reintentar. Si es null, es que es único e insertable.
         String newNumber = createRandomFormat();
-        if (userDao.getUserByRegistrationNumber(newNumber) == null){
+        if (userDao.getUserByRegistrationNumber(newNumber) == null) {
             throw new RuntimeException("Usuario no existente");
         }
 
         return newNumber;
-
     }
 
-
-
     /**
-     * Función auxiliar que crea el string con el formato Letra-Número-Número-Letra-Letra.
+     * Función auxiliar que crea el string con el formato
+     * Letra-Número-Número-Letra-Letra.
      */
     private String createRandomFormat() {
 

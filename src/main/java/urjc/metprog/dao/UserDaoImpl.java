@@ -11,7 +11,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void insertUser(User user) {
-        String sql = "INSERT INTO usuarios (nick, name, password, num_reg, character_id, victories) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO usuarios (nick, name, password, num_reg, character_id, victories, role, is_blocked) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -26,6 +26,8 @@ public class UserDaoImpl implements UserDao {
             // se crea sin personaje y se le asigna después, por lo que insertamos NULL.
             pstmt.setNull(5, java.sql.Types.INTEGER);
             pstmt.setInt(6, user.getVictories());
+            pstmt.setString(7, user.getRole());
+            pstmt.setInt(8, user.isBlocked() ? 1 : 0);
             
             pstmt.executeUpdate();
             System.out.println("Usuario " + user.getNick() + " insertado correctamente en la base de datos.");
@@ -37,8 +39,8 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void updateUser(User user) {
-        // Actualizamos nombre, contraseña y victorias buscando al usuario por su nick (que es único)
-        String sql = "UPDATE usuarios SET name = ?, password = ?, victories = ? WHERE nick = ?";
+        // Actualizamos nombre, contraseña, victorias, rol y bloqueo buscando al usuario por su nick (que es único)
+        String sql = "UPDATE usuarios SET name = ?, password = ?, victories = ?, role = ?, is_blocked = ? WHERE nick = ?";
         
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -46,7 +48,9 @@ public class UserDaoImpl implements UserDao {
             pstmt.setString(1, user.getName());
             pstmt.setString(2, user.getPassword());
             pstmt.setInt(3, user.getVictories());
-            pstmt.setString(4, user.getNick());
+            pstmt.setString(4, user.getRole());
+            pstmt.setInt(5, user.isBlocked() ? 1 : 0);
+            pstmt.setString(6, user.getNick());
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -97,6 +101,8 @@ public class UserDaoImpl implements UserDao {
                             .setPassword(rs.getString("password"))
                             .setRegistrationNumber(rs.getString("num_reg"))
                             .setVictories(rs.getInt("victories"))
+                            .setRole(rs.getString("role"))
+                            .setBlocked(rs.getInt("is_blocked") == 1)
                             .build();
                 }
             }
@@ -121,6 +127,8 @@ public class UserDaoImpl implements UserDao {
                             .setPassword(rs.getString("password"))
                             .setRegistrationNumber(rs.getString("num_reg"))
                             .setVictories(rs.getInt("victories"))
+                            .setRole(rs.getString("role"))
+                            .setBlocked(rs.getInt("is_blocked") == 1)
                             .build();
                 }
             }
