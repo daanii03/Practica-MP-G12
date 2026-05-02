@@ -2,6 +2,7 @@ package main.java.urjc.metprog.controllers;
 
 import java.util.List;
 import main.java.urjc.metprog.dao.DatabaseManager;
+import main.java.urjc.metprog.dao.CharacterDaoImpl;
 
 public class Application {
     
@@ -30,8 +31,8 @@ public class Application {
         // this.userManager = new UserManager();
         // this.combatSystem = new CombatSystem();
         
-        // TODO: Reemplazar null por la implementación concreta de CharacterDao cuando exista
-        this.characterManager = new CharacterManager(null);
+        // Instanciamos el manager inyectándole la implementación real del DAO
+        this.characterManager = new CharacterManager(new CharacterDaoImpl());
     }
 
     // ==========================================

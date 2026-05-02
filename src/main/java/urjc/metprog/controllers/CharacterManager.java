@@ -1,7 +1,7 @@
 package main.java.urjc.metprog.controllers;
 
 import main.java.urjc.metprog.models.characters.Character;
-import main.java.urjc.metprog.models.dao.CharacterDao;
+import main.java.urjc.metprog.dao.CharacterDao;
 import main.java.urjc.metprog.models.factorys.HunterFactory;
 import main.java.urjc.metprog.models.factorys.VampireFactory;
 import main.java.urjc.metprog.models.factorys.WerewolfFactory;
