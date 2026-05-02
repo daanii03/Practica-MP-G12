@@ -1,6 +1,6 @@
 package main.java.urjc.metprog.controllers;
 
-import main.java.urjc.metprog.models.dao.UserDao;
+import main.java.urjc.metprog.dao.UserDao;
 import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.user.UserBuilder;
 import java.util.Random;
@@ -30,12 +30,12 @@ public class UserManager {
                 .setRegistrationNumber(numRegistro)
                 .build();
 
-        userDao.insertarUsuario(nuevoUsuario);
+        userDao.insertUser(nuevoUsuario);
         return nuevoUsuario;
     }
 
     public User inicioSesion(String nick, String password) {
-        User user = userDao.devolverUsuario(nick);
+        User user = userDao.getUser(nick);
         if (user != null && user.getPassword().equals(password)) {
             return user; // Login exitoso
         }
@@ -45,7 +45,7 @@ public class UserManager {
     public void darBajaUsuario(String nick, String password) {
         User user = inicioSesion(nick, password);
         if (user != null) {
-            userDao.darBajaUsuario(nick);
+            userDao.deleteUser(nick);
         } else {
             throw new IllegalArgumentException("Credenciales incorrectas para dar de baja.");
         }

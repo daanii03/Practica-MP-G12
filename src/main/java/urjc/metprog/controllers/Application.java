@@ -3,14 +3,14 @@ package main.java.urjc.metprog.controllers;
 import java.util.List;
 import main.java.urjc.metprog.dao.DatabaseManager;
 import main.java.urjc.metprog.dao.CharacterDaoImpl;
+import main.java.urjc.metprog.dao.UserDaoImpl;
 
 public class Application {
     
-    // Aquí irían las instancias de otros controladores o gestores de la aplicación
-    // Por ejemplo:
-    // private UserManager userManager;
-    // private CombatSystem combatSystem;
     private CharacterManager characterManager;
+    private UserManager userManager;
+    // TODO: Crear y añadir la instancia de ChallengeManager cuando la clase esté programada
+    // private ChallengeManager challengeManager;
 
     public Application() {
         // El constructor ahora se deja limpio intencionadamente.
@@ -27,12 +27,10 @@ public class Application {
         // 1. Inicializar infraestructura
         DatabaseManager.createTables();
         
-        // 2. Instanciar lógica de negocio
-        // this.userManager = new UserManager();
-        // this.combatSystem = new CombatSystem();
-        
-        // Instanciamos el manager inyectándole la implementación real del DAO
+        // Instanciar gestores con sus respectivos DAOs (Composición)
         this.characterManager = new CharacterManager(new CharacterDaoImpl());
+        this.userManager = new UserManager(new UserDaoImpl());
+        // TODO: this.challengeManager = new ChallengeManager(...);
     }
 
     // ==========================================
