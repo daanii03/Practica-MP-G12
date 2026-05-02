@@ -50,7 +50,18 @@ public class DatabaseManager {
                              + ");";
                              
         String sqlDesafios = "CREATE TABLE IF NOT EXISTS desafios ("
-                           + "id INTEGER PRIMARY KEY AUTOINCREMENT"
+                           + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                           + "challenger_id INTEGER NOT NULL, "
+                           + "challenged_id INTEGER NOT NULL, "
+                           + "rounds_played INTEGER NOT NULL, "
+                           + "combat_date TEXT NOT NULL, "
+                           + "winner_id INTEGER, "
+                           + "challenger_kept_minions INTEGER DEFAULT 0 CHECK (challenger_kept_minions IN (0, 1)), "
+                           + "challenged_kept_minions INTEGER DEFAULT 0 CHECK (challenged_kept_minions IN (0, 1)), "
+                           + "gold_won INTEGER NOT NULL, "
+                           + "FOREIGN KEY(challenger_id) REFERENCES usuarios(id), "
+                           + "FOREIGN KEY(challenged_id) REFERENCES usuarios(id), "
+                           + "FOREIGN KEY(winner_id) REFERENCES usuarios(id)"
                            + ");";
 
         try (Connection conn = getConnection();
