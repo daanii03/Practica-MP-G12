@@ -37,7 +37,14 @@ public class DatabaseManager {
                            + ");";
                            
         String sqlPersonajes = "CREATE TABLE IF NOT EXISTS personajes ("
-                             + "id INTEGER PRIMARY KEY AUTOINCREMENT"
+                             + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                             + "user_id INTEGER NOT NULL, "
+                             + "name TEXT NOT NULL, "
+                             + "race TEXT NOT NULL CHECK(race IN ('werewolf', 'vampire', 'hunter')), "
+                             + "gold INTEGER NOT NULL, "
+                             // TODO: añadir columna para inventario
+                             + "special_skill TEXT NOT NULL CHECK(special_skill IN ('discipline', 'gift', 'talent')), "
+                             + "FOREIGN KEY(user_id) REFERENCES usuarios(id)"
                              + ");";
                              
         String sqlDesafios = "CREATE TABLE IF NOT EXISTS desafios ("
