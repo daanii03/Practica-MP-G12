@@ -4,11 +4,13 @@ import java.util.List;
 import main.java.urjc.metprog.dao.DatabaseManager;
 import main.java.urjc.metprog.dao.CharacterDaoImpl;
 import main.java.urjc.metprog.dao.UserDaoImpl;
+import main.java.urjc.metprog.models.user.User;
 
 public class Application {
     
     private CharacterManager characterManager;
     private UserManager userManager;
+    private User currentUser;
     // TODO: Crear y añadir la instancia de ChallengeManager cuando la clase esté programada
     // private ChallengeManager challengeManager;
 
@@ -37,21 +39,51 @@ public class Application {
     // MÉTODOS DE GESTIÓN DE USUARIOS
     // ==========================================
 
-    public boolean loginUser(String username, String password) {
-        // Lógica de inicio de sesión delegada a userManager
-        return false;
+    public boolean loginUser(String nick, String password) {
+        try {
+            User user = userManager.logIn(nick, password);
+            if (user != null) {
+                this.currentUser = user;
+                System.out.println("Bienvenido, " + user.getName() + " (" + user.getNick() + ")");
+                return true;
+            } else {
+                System.out.println("Error: Nick o contraseña incorrectos.");
+                return false;
+            }
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
     }
 
-    public void registerUser(String username, String password, String nick) {
-        // Lógica de registro delegada a userManager
+    public void registerUser(String name, String nick, String password) {
+        try {
+            User newUser = userManager.signUp(name, nick, password);
+            System.out.println("Registro completado. Tu número de registro es: " + newUser.getRegistrationNumber());
+        } catch (RuntimeException e) {
+            System.out.println("Error en el registro: " + e.getMessage());
+        }
     }
 
     public void logoutUser() {
-        // Lógica para cerrar sesión
+        if (currentUser != null) {
+            userManager.logOut(currentUser);
+            currentUser = null;
+        } else {
+            System.out.println("No hay ninguna sesión activa.");
+        }
     }
 
-    public void deleteAccount() {
-        // Lógica para borrar la cuenta del usuario actualmente logueado
+    public void deleteAccount(String nick, String password) {
+        try {
+            userManager.deleteUser(nick, password);
+            System.out.println("Cuenta eliminada correctamente.");
+            if (currentUser != null && currentUser.getNick().equals(nick)) {
+                currentUser = null;
+            }
+        } catch (RuntimeException e) {
+            System.out.println("Error al eliminar la cuenta: " + e.getMessage());
+        }
     }
 
     // ==========================================

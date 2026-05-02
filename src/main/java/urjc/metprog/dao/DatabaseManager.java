@@ -36,7 +36,9 @@ public class DatabaseManager {
                 + "password TEXT NOT NULL, "
                 + "num_reg TEXT NOT NULL, "
                 + "character_id INTEGER, "
-                + "victories INTEGER DEFAULT 0"
+                + "victories INTEGER DEFAULT 0, "
+                + "role TEXT DEFAULT 'user', "
+                + "is_blocked INTEGER DEFAULT 0"
                 + ");";
 
         String sqlPersonajes = "CREATE TABLE IF NOT EXISTS personajes ("
