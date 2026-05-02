@@ -12,7 +12,6 @@ public class Main {
         app.init();
         
         CliInterface cli = new CliInterface(app);
-        
-        System.out.println("Hola mundo");
+        cli.start();
     }
 }
