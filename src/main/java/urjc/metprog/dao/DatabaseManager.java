@@ -44,11 +44,57 @@ public class DatabaseManager {
                              + "gold INTEGER NOT NULL, "
                              + "life INTEGER NOT NULL CHECK (life BETWEEN 0 AND 5), "
                              + "power INTEGER NOT NULL CHECK (power BETWEEN 1 AND 5), "
-                             // TODO: añadir columna para inventario
+                             // Habilidad especial: tipo + stats (columnas directas, sin tabla extra)
                              + "special_skill TEXT NOT NULL CHECK(special_skill IN ('discipline', 'gift', 'talent')), "
+                             + "skill_name TEXT NOT NULL, "
+                             + "skill_attack INTEGER NOT NULL CHECK (skill_attack BETWEEN 1 AND 3), "
+                             + "skill_defense INTEGER NOT NULL CHECK (skill_defense BETWEEN 1 AND 3), "
+                             + "skill_cost INTEGER DEFAULT 0, "
+                             // Atributos exclusivos de cada raza (NULL si no aplica)
+                             + "age INTEGER, "
+                             + "blood_points INTEGER, "
+                             + "rage INTEGER, "
+                             + "will INTEGER, "
                              + "FOREIGN KEY(user_id) REFERENCES usuarios(id)"
                              + ");";
-                             
+        
+        // Tabla de equipamiento (armas y armaduras del inventario)
+        String sqlEquipment = "CREATE TABLE IF NOT EXISTS equipamiento ("
+                            + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            + "character_id INTEGER NOT NULL, "
+                            + "type TEXT NOT NULL CHECK(type IN ('weapon', 'armor')), "
+                            + "name TEXT NOT NULL, "
+                            + "attack_modifier INTEGER NOT NULL CHECK (attack_modifier BETWEEN 0 AND 3), "
+                            + "defense_modifier INTEGER NOT NULL CHECK (defense_modifier BETWEEN 0 AND 3), "
+                            + "is_one_hand INTEGER, "       // solo aplica a armas (1 = true, 0 = false, NULL = armadura)
+                            + "is_active INTEGER DEFAULT 0 CHECK (is_active IN (0, 1)), " // ¿está equipado?
+                            + "FOREIGN KEY(character_id) REFERENCES personajes(id) ON DELETE CASCADE"
+                            + ");";
+        
+        // Tabla de esbirros
+        String sqlMinions = "CREATE TABLE IF NOT EXISTS esbirros ("
+                          + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                          + "character_id INTEGER NOT NULL, "
+                          + "type TEXT NOT NULL CHECK(type IN ('human', 'ghoul', 'demon')), "
+                          + "name TEXT NOT NULL, "
+                          + "health INTEGER NOT NULL CHECK (health BETWEEN 1 AND 3), "
+                          // Atributos específicos según tipo (NULL si no aplica)
+                          + "loyalty TEXT CHECK(loyalty IN ('ALTA', 'NORMAL', 'BAJA')), "  // solo humanos
+                          + "dependence INTEGER, "                                          // solo ghouls
+                          + "pact_description TEXT, "                                        // solo demonios
+                          + "FOREIGN KEY(character_id) REFERENCES personajes(id) ON DELETE CASCADE"
+                          + ");";
+        
+        // Tabla de modificadores (fortalezas y debilidades)
+        String sqlModifiers = "CREATE TABLE IF NOT EXISTS modificadores ("
+                            + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            + "character_id INTEGER NOT NULL, "
+                            + "type TEXT NOT NULL CHECK(type IN ('strength', 'weakness')), "
+                            + "name TEXT NOT NULL, "
+                            + "value INTEGER NOT NULL CHECK (value BETWEEN 1 AND 5), "
+                            + "FOREIGN KEY(character_id) REFERENCES personajes(id) ON DELETE CASCADE"
+                            + ");";
+                              
         String sqlDesafios = "CREATE TABLE IF NOT EXISTS desafios ("
                            + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                            + "challenger_id INTEGER NOT NULL, "
@@ -70,9 +116,12 @@ public class DatabaseManager {
             // Ejecutar las sentencias de creación
             stmt.execute(sqlUsuarios);
             stmt.execute(sqlPersonajes);
+            stmt.execute(sqlEquipment);
+            stmt.execute(sqlMinions);
+            stmt.execute(sqlModifiers);
             stmt.execute(sqlDesafios);
             
-            System.out.println("Tablas inicializadas correctamente (usuarios, personajes, desafios).");
+            System.out.println("Tablas inicializadas correctamente (usuarios, personajes, equipamiento, esbirros, modificadores, desafios).");
             
         } catch (SQLException e) {
             System.err.println("Error al inicializar la base de datos: " + e.getMessage());
