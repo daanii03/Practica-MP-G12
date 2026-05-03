@@ -5,6 +5,7 @@ import main.java.urjc.metprog.dao.DatabaseManager;
 import main.java.urjc.metprog.dao.CharacterDaoImpl;
 import main.java.urjc.metprog.dao.UserDaoImpl;
 import main.java.urjc.metprog.models.user.User;
+import main.java.urjc.metprog.models.characters.Character;
 
 public class Application {
     
@@ -91,7 +92,35 @@ public class Application {
     // ==========================================
 
     public void createCharacter(String name, String characterType) {
-        // Lógica de creación de personaje delegada a characterManager
+        if (currentUser == null) {
+            System.out.println("Error: Debes iniciar sesión para crear un personaje.");
+            return;
+        }
+        try {
+            // TODO: Gestionar la elección de habilidad especial. Actualmente se asigna una por defecto en la Factory.
+            characterManager.createCharacter(currentUser.getNick(), name, characterType);
+            System.out.println("Personaje '" + name + "' creado correctamente para el usuario " + currentUser.getNick());
+        } catch (Exception e) {
+            System.out.println("Error al crear el personaje: " + e.getMessage());
+        }
+    }
+
+    public void deleteCharacter() {
+        if (currentUser == null) {
+            System.out.println("Error: Debes iniciar sesión para dar de baja un personaje.");
+            return;
+        }
+        try {
+            Character character = characterManager.getCharacterByUser(currentUser.getNick());
+            if (character != null) {
+                characterManager.deleteCharacter(character.getId());
+                System.out.println("Personaje eliminado correctamente.");
+            } else {
+                System.out.println("El usuario no tiene ningún personaje que eliminar.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error al eliminar el personaje: " + e.getMessage());
+        }
     }
 
     public void chooseSkill(String skillName) {
@@ -106,8 +135,26 @@ public class Application {
         // Lógica para gestionar el equipo (armas, armaduras) del personaje
     }
 
-    public void showPlayerProfile() {
-        // Lógica para obtener/mostrar el perfil del jugador y personaje
+    public void showCharacterInfo() {
+        if (currentUser == null) {
+            System.out.println("Error: Debes iniciar sesión para ver tu personaje.");
+            return;
+        }
+        Character character = characterManager.getCharacterByUser(currentUser.getNick());
+        if (character == null) {
+            System.out.println("No tienes ningún personaje creado.");
+            return;
+        }
+
+        System.out.println("\n=== INFORMACIÓN DEL PERSONAJE ===");
+        System.out.println("Nombre: " + character.getName());
+        System.out.println("Vida: " + character.getLife() + "/5");
+        System.out.println("Poder: " + character.getPower() + "/5");
+        System.out.println("Oro: " + character.checkGold());
+        System.out.println("Habilidad Especial: " + character.getSpecialSkill().getName());
+        System.out.println("Esbirros: " + character.getMinions().size());
+        System.out.println("Fortalezas: " + character.getStrengths().size());
+        System.out.println("Debilidades: " + character.getWeaknesses().size());
     }
 
     // ==========================================
