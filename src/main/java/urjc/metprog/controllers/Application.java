@@ -93,6 +93,12 @@ public class Application {
         if (currentUser == null) {
             throw new IllegalStateException("Debes iniciar sesión para crear un personaje.");
         }
+        
+        // Comprobar si ya tiene un personaje registrado
+        if (characterManager.getCharacterByUser(currentUser.getNick()) != null) {
+            throw new IllegalStateException("Ya tienes un personaje registrado. Solo se permite uno por usuario.");
+        }
+
         // TODO: Gestionar la elección de habilidad especial. Actualmente se asigna una por defecto en la Factory.
         return characterManager.createCharacter(currentUser.getNick(), name, characterType);
     }
