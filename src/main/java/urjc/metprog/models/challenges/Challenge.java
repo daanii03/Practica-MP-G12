@@ -1,4 +1,4 @@
-package main.java.urjc.metprog.models.challenge;
+package main.java.urjc.metprog.models.challenges;
 
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.user.User;

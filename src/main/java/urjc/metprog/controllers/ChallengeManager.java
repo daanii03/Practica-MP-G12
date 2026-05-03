@@ -1,4 +1,4 @@
-package main.java.urjc.metprog.dao;
+package main.java.urjc.metprog.controllers;
 
 import main.java.urjc.metprog.models.challenges.Challenge;
 import main.java.urjc.metprog.models.user.User;
@@ -44,25 +44,23 @@ public class ChallengeManager {
 
     public List<Challenge> findPendingValidation() {
         return challenges.stream()
-                .filter(c -> c.getEstado() == Challenge.Estado.PENDIENTE_VALIDACION)
+                .filter(c -> c.getStatus() == Challenge.Status.PENDING_VALIDATION)
                 .collect(Collectors.toList());
     }
 
     public Optional<Challenge> findPublishedChallengeForUser(User user) {
         return challenges.stream()
-                .filter(c -> c.getEstado() == Challenge.Estado.PUBLICADO)
+                .filter(c -> c.getStatus() == Challenge.Status.PUBLISHED)
                 .filter(c -> c.getChallenged().getNick().equals(user.getNick()))
                 .findFirst();
     }
 
-    /*Challenges que ha enviado éste usuario */
     public List<Challenge> findByChallengerNick(String nick) {
         return challenges.stream()
                 .filter(c -> c.getChallenger().getNick().equals(nick))
                 .collect(Collectors.toList());
     }
 
-    /*Challenges que ha recibido éste usuario */
     public List<Challenge> findByChallengedNick(String nick) {
         return challenges.stream()
                 .filter(c -> c.getChallenged().getNick().equals(nick))
@@ -71,9 +69,9 @@ public class ChallengeManager {
 
     public boolean hasActiveChallenge(User user) {
         return challenges.stream()
-                .filter(c -> c.getEstado() == Challenge.Estado.PENDIENTE_VALIDACION
-                          || c.getEstado() == Challenge.Estado.PUBLICADO)
+                .filter(c -> c.getStatus() == Challenge.Status.PENDING_VALIDATION
+                        || c.getStatus() == Challenge.Status.PUBLISHED)
                 .anyMatch(c -> c.getChallenger().getNick().equals(user.getNick())
-                            || c.getChallenged().getNick().equals(user.getNick()));
+                        || c.getChallenged().getNick().equals(user.getNick()));
     }
 }

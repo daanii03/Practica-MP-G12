@@ -1,6 +1,6 @@
-package main.java.urjc.metprog.models.combat;
+package main.java.urjc.metprog.models.challenges;
 
-import main.java.urjc.metprog.models.challenge.Challenge;
+import main.java.urjc.metprog.models.challenges.Challenge;
 import main.java.urjc.metprog.models.user.User;
 
 import java.time.LocalDateTime;

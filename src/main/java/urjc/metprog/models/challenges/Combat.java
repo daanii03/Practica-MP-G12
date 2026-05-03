@@ -1,7 +1,6 @@
-package main.java.urjc.metprog.models.combat;
+package main.java.urjc.metprog.models.challenges;
 
 import main.java.urjc.metprog.dao.UserDaoImpl;
-import main.java.urjc.metprog.models.challenge.Challenge;
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.characters.Hunter;
 import main.java.urjc.metprog.models.characters.Vampire;
@@ -9,6 +8,7 @@ import main.java.urjc.metprog.models.characters.Werewolf;
 import main.java.urjc.metprog.models.equipment.Weapon;
 import main.java.urjc.metprog.models.minions.Minion;
 import main.java.urjc.metprog.models.user.User;
+
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
