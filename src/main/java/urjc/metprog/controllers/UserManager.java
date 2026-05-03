@@ -170,4 +170,10 @@ public class UserManager {
 
     }
 
+    /**
+     * Devuelve el ranking global de usuarios ordenado por victorias.
+     */
+    public java.util.List<User> getRanking() {
+        return userDao.getGlobalRanking();
+    }
 }

@@ -1,8 +1,15 @@
 package main.java.urjc.metprog.views;
 
+import java.util.List;
 import java.util.Scanner;
 import main.java.urjc.metprog.controllers.Application;
+import main.java.urjc.metprog.models.user.User;
+import main.java.urjc.metprog.models.characters.Character;
 
+/**
+ * Interfaz de línea de comandos (CLI).
+ * Única responsable de la interacción con el usuario y la representación de datos.
+ */
 public class CliInterface {
 
     private final Application app;
@@ -13,9 +20,6 @@ public class CliInterface {
         this.scanner = new Scanner(System.in);
     }
 
-    /**
-     * Punto de entrada principal de la interfaz.
-     */
     public void start() {
         boolean exit = false;
         while (!exit) {
@@ -45,19 +49,23 @@ public class CliInterface {
         }
     }
 
-    public void showLoginMenu() {
+    private void showLoginMenu() {
         System.out.println("\n--- INICIO DE SESIÓN ---");
         System.out.print("Introduce tu nick: ");
         String nick = scanner.nextLine();
         System.out.print("Introduce tu contraseña: ");
         String password = scanner.nextLine();
         
-        if (app.loginUser(nick, password)) {
+        try {
+            User user = app.loginUser(nick, password);
+            System.out.println("Bienvenido, " + user.getName() + " (" + user.getNick() + ")");
             showPlayerMenu();
+        } catch (RuntimeException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
-    public void showRegisterMenu() {
+    private void showRegisterMenu() {
         System.out.println("\n--- REGISTRO DE NUEVO JUGADOR ---");
         System.out.print("Nombre completo: ");
         String name = scanner.nextLine();
@@ -66,16 +74,22 @@ public class CliInterface {
         System.out.print("Contraseña (8-12 caracteres): ");
         String password = scanner.nextLine();
         
-        app.registerUser(name, nick, password);
+        try {
+            User newUser = app.registerUser(name, nick, password);
+            System.out.println("Registro completado con éxito.");
+            System.out.println("Tu número de registro es: " + newUser.getRegistrationNumber());
+        } catch (RuntimeException e) {
+            System.out.println("Error en el registro: " + e.getMessage());
+        }
     }
 
-    public void showPlayerMenu() {
+    private void showPlayerMenu() {
         boolean logout = false;
         while (!logout) {
             System.out.println("\n--- MENÚ PRINCIPAL ---");
             System.out.println("1. Gestionar Personaje");
             System.out.println("2. Buscar Desafíos (Próximamente)");
-            System.out.println("3. Ver Ranking (Próximamente)");
+            System.out.println("3. Ver Ranking Global");
             System.out.println("4. Darse de baja (Eliminar cuenta)");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
@@ -85,12 +99,17 @@ public class CliInterface {
                 case "1":
                     showCharacterSubMenu();
                     break;
+                case "3":
+                    showGlobalRanking();
+                    break;
                 case "4":
-                    showDeleteAccountMenu();
-                    logout = true; // Al borrar la cuenta, salimos al menú principal
+                    if (showDeleteAccountMenu()) {
+                        logout = true;
+                    }
                     break;
                 case "0":
                     app.logoutUser();
+                    System.out.println("Sesión cerrada.");
                     logout = true;
                     break;
                 default:
@@ -112,7 +131,7 @@ public class CliInterface {
             String option = scanner.nextLine();
             switch (option) {
                 case "1":
-                    app.showCharacterInfo();
+                    displayCharacterInfo();
                     break;
                 case "2":
                     showCharacterCreationMenu();
@@ -127,6 +146,24 @@ public class CliInterface {
                     System.out.println("Opción no válida.");
             }
         }
+    }
+
+    private void displayCharacterInfo() {
+        Character character = app.getCurrentUserCharacter();
+        if (character == null) {
+            System.out.println("No tienes ningún personaje creado.");
+            return;
+        }
+
+        System.out.println("\n=== INFORMACIÓN DEL PERSONAJE ===");
+        System.out.println("Nombre: " + character.getName());
+        System.out.println("Vida: " + character.getLife() + "/5");
+        System.out.println("Poder: " + character.getPower() + "/5");
+        System.out.println("Oro: " + character.checkGold());
+        System.out.println("Habilidad Especial: " + character.getSpecialSkill().getName());
+        System.out.println("Esbirros: " + character.getMinions().size());
+        System.out.println("Fortalezas: " + character.getStrengths().size());
+        System.out.println("Debilidades: " + character.getWeaknesses().size());
     }
 
     private void showCharacterCreationMenu() {
@@ -150,7 +187,12 @@ public class CliInterface {
                 return;
         }
         
-        app.createCharacter(name, race);
+        try {
+            Character c = app.createCharacter(name, race);
+            System.out.println("Personaje '" + c.getName() + "' creado correctamente.");
+        } catch (RuntimeException e) {
+            System.out.println("Error al crear el personaje: " + e.getMessage());
+        }
     }
 
     private void showCharacterDeletionMenu() {
@@ -159,13 +201,32 @@ public class CliInterface {
         String confirm = scanner.nextLine();
         
         if (confirm.equalsIgnoreCase("S")) {
-            app.deleteCharacter();
+            try {
+                app.deleteCharacter();
+                System.out.println("Personaje eliminado correctamente.");
+            } catch (RuntimeException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
         } else {
             System.out.println("Operación cancelada.");
         }
     }
 
-    private void showDeleteAccountMenu() {
+    private void showGlobalRanking() {
+        List<User> ranking = app.getGlobalRanking();
+        System.out.println("\n=== RANKING GLOBAL DE VICTORIAS ===");
+        if (ranking.isEmpty()) {
+            System.out.println("No hay usuarios registrados todavía.");
+            return;
+        }
+
+        int pos = 1;
+        for (User user : ranking) {
+            System.out.printf("%d. %-15s - Victorias: %d%n", pos++, user.getNick(), user.getVictories());
+        }
+    }
+
+    private boolean showDeleteAccountMenu() {
         System.out.println("\n--- ELIMINAR CUENTA ---");
         System.out.println("¡ATENCIÓN! Esta acción es irreversible.");
         System.out.print("Confirma tu nick: ");
@@ -177,9 +238,16 @@ public class CliInterface {
         String confirm = scanner.nextLine();
         
         if (confirm.equalsIgnoreCase("S")) {
-            app.deleteAccount(nick, password);
+            try {
+                app.deleteAccount(nick, password);
+                System.out.println("Cuenta eliminada correctamente.");
+                return true;
+            } catch (RuntimeException e) {
+                System.out.println("Error al eliminar la cuenta: " + e.getMessage());
+            }
         } else {
             System.out.println("Operación cancelada.");
         }
+        return false;
     }
 }

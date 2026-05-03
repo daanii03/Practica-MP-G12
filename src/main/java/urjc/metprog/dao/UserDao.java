@@ -13,5 +13,6 @@ public interface UserDao {
      * @return El objeto User si lo encuentra, o null si está libre.
      */
     User getUserByRegistrationNumber(String numReg);
+    java.util.List<User> getGlobalRanking();
 }
 

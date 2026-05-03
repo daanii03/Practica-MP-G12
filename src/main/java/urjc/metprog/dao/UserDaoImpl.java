@@ -137,4 +137,29 @@ public class UserDaoImpl implements UserDao {
         }
         return null;
     }
+
+    @Override
+    public java.util.List<User> getGlobalRanking() {
+        java.util.List<User> ranking = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM usuarios ORDER BY victories DESC";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                ranking.add(new UserBuilder()
+                        .setName(rs.getString("name"))
+                        .setNick(rs.getString("nick"))
+                        .setPassword(rs.getString("password"))
+                        .setRegistrationNumber(rs.getString("num_reg"))
+                        .setVictories(rs.getInt("victories"))
+                        .setRole(rs.getString("role"))
+                        .setBlocked(rs.getInt("is_blocked") == 1)
+                        .build());
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al recuperar el ranking global: " + e.getMessage());
+        }
+        return ranking;
+    }
 }
