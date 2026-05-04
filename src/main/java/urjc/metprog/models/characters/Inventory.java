@@ -172,4 +172,24 @@ public class Inventory {
     public void addWeapon(Weapon weapon){
         this.weapons.add(weapon);
     }
+
+    /**
+     * Elimina una armadura de la colección.
+     * @param armor Armadura a eliminar.
+     */
+    public void removeArmor(Armor armor) {
+        this.armors.remove(armor);
+        if (activeArmor == armor) {
+            activeArmor = null;
+        }
+    }
+
+    /**
+     * Elimina un arma de la colección.
+     * @param weapon Arma a eliminar.
+     */
+    public void removeWeapon(Weapon weapon) {
+        this.weapons.remove(weapon);
+        this.activeWeapons.remove(weapon);
+    }
 }

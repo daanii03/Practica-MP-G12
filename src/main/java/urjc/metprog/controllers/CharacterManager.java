@@ -213,4 +213,49 @@ public class CharacterManager {
     public java.util.Map<String, Character> getAllCharacters() {
         return characterDao.getAllCharactersWithOwners();
     }
+
+    /**
+     * Obtiene el catálogo global de equipo predefinido.
+     */
+    public java.util.List<String[]> getCatalog() {
+        return characterDao.getEquipmentCatalog();
+    }
+
+    /**
+     * Añade una armadura al inventario del personaje de un usuario.
+     *
+     * @param ownerNick Nick del usuario dueño del personaje.
+     * @param armor     La armadura a añadir.
+     */
+    public void addArmorToInventory(String ownerNick, Armor armor) {
+        Character character = getCharacterByUser(ownerNick);
+        if (character != null) {
+            character.getInventory().addArmor(armor);
+            updateCharacter(ownerNick, character);
+        } else {
+            throw new IllegalArgumentException("El usuario especificado no tiene personaje.");
+        }
+    }
+
+    /**
+     * Elimina un arma del inventario.
+     */
+    public void removeWeaponFromInventory(String ownerNick, Weapon weapon) {
+        Character character = getCharacterByUser(ownerNick);
+        if (character != null) {
+            character.getInventory().removeWeapon(weapon);
+            updateCharacter(ownerNick, character);
+        }
+    }
+
+    /**
+     * Elimina una armadura del inventario.
+     */
+    public void removeArmorFromInventory(String ownerNick, Armor armor) {
+        Character character = getCharacterByUser(ownerNick);
+        if (character != null) {
+            character.getInventory().removeArmor(armor);
+            updateCharacter(ownerNick, character);
+        }
+    }
 }

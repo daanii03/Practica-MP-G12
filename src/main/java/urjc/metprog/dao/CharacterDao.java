@@ -16,4 +16,10 @@ public interface CharacterDao {
      * @return Mapa de ownerNick -> Character.
      */
     java.util.Map<String, Character> getAllCharactersWithOwners();
+
+    /**
+     * Obtiene todos los objetos predefinidos del catálogo global.
+     * Cada elemento es un array con: [id, name, type, attack, defense, is_one_hand].
+     */
+    java.util.List<String[]> getEquipmentCatalog();
 }

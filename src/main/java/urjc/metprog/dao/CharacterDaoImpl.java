@@ -586,4 +586,29 @@ public class CharacterDaoImpl implements CharacterDao {
         }
         return result;
     }
+    @Override
+    public java.util.List<String[]> getEquipmentCatalog() {
+        java.util.List<String[]> catalog = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM catalogo_equipo";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String[] item = {
+                    String.valueOf(rs.getInt("id")),
+                    rs.getString("name"),
+                    rs.getString("type"),
+                    String.valueOf(rs.getInt("attack")),
+                    String.valueOf(rs.getInt("defense")),
+                    String.valueOf(rs.getInt("is_one_hand"))
+                };
+                catalog.add(item);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al recuperar el catálogo de equipo: " + e.getMessage());
+        }
+        return catalog;
+    }
 }

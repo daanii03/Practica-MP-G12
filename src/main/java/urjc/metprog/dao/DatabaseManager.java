@@ -2,6 +2,8 @@ package main.java.urjc.metprog.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -114,6 +116,15 @@ public class DatabaseManager {
                 + "FOREIGN KEY(winner_id) REFERENCES usuarios(id)"
                 + ");";
 
+        String sqlCatalogo = "CREATE TABLE IF NOT EXISTS catalogo_equipo ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "name TEXT NOT NULL UNIQUE, "
+                + "type TEXT NOT NULL CHECK(type IN ('weapon', 'armor')), "
+                + "attack INTEGER NOT NULL, "
+                + "defense INTEGER NOT NULL, "
+                + "is_one_hand INTEGER DEFAULT 0"
+                + ");";
+
         try (Connection conn = getConnection();
                 Statement stmt = conn.createStatement()) {
 
@@ -124,12 +135,71 @@ public class DatabaseManager {
             stmt.execute(sqlMinions);
             stmt.execute(sqlModifiers);
             stmt.execute(sqlDesafios);
+            stmt.execute(sqlCatalogo);
+
+            seedCatalog(conn);
 
             System.out.println(
-                    "Tablas inicializadas correctamente (usuarios, personajes, equipamiento, esbirros, modificadores, desafios).");
+                    "Tablas inicializadas correctamente (usuarios, personajes, equipamiento, esbirros, modificadores, desafios, catalogo).");
 
         } catch (SQLException e) {
             System.err.println("Error al inicializar la base de datos: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Rellena el catálogo con armas y armaduras iniciales si está vacío.
+     */
+    private static void seedCatalog(Connection conn) {
+        String checkSql = "SELECT COUNT(*) FROM catalogo_equipo";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(checkSql)) {
+            
+            if (rs.next() && rs.getInt(1) > 0) {
+                return; // Ya hay datos
+            }
+
+            String insertSql = "INSERT INTO catalogo_equipo (name, type, attack, defense, is_one_hand) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
+                // 5 ARMAS
+                String[][] weapons = {
+                    {"Espada Celestial", "3", "1", "1"},
+                    {"Daga de las Sombras", "2", "0", "1"},
+                    {"Hacha de Guerra Pesada", "3", "0", "0"},
+                    {"Arco de Cazador", "2", "1", "0"},
+                    {"Cuchillo de Plata", "1", "1", "1"}
+                };
+                for (String[] w : weapons) {
+                    pstmt.setString(1, w[0]);
+                    pstmt.setString(2, "weapon");
+                    pstmt.setInt(3, Integer.parseInt(w[1]));
+                    pstmt.setInt(4, Integer.parseInt(w[2]));
+                    pstmt.setInt(5, Integer.parseInt(w[3]));
+                    pstmt.addBatch();
+                }
+
+                // 5 ARMADURAS
+                String[][] armors = {
+                    {"Armadura de Placas de Ébano", "0", "3"},
+                    {"Cota de Malla Reforzada", "0", "2"},
+                    {"Capa de Invisibilidad", "1", "2"},
+                    {"Escudo de Roble Antiguo", "0", "2"},
+                    {"Manto de Sangre", "2", "1"}
+                };
+                for (String[] a : armors) {
+                    pstmt.setString(1, a[0]);
+                    pstmt.setString(2, "armor");
+                    pstmt.setInt(3, Integer.parseInt(a[1]));
+                    pstmt.setInt(4, Integer.parseInt(a[2]));
+                    pstmt.setInt(5, 0); // No aplica a armaduras
+                    pstmt.addBatch();
+                }
+
+                pstmt.executeBatch();
+                System.out.println("Catálogo de equipo inicializado con 10 objetos.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al sembrar el catálogo: " + e.getMessage());
         }
     }
 }

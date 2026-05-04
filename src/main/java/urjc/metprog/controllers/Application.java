@@ -267,6 +267,41 @@ public class Application {
         characterManager.updateCharacter(ownerNick, character);
     }
 
+    /**
+     * Obtiene el catálogo de objetos predefinidos.
+     */
+    public java.util.List<String[]> getCatalog() {
+        return characterManager.getCatalog();
+    }
+
+    /**
+     * Añade un arma al inventario de un usuario.
+     */
+    public void addWeaponToInventory(String ownerNick, Weapon weapon) {
+        characterManager.addWeaponToInventory(ownerNick, weapon);
+    }
+
+    /**
+     * Añade una armadura al inventario de un usuario.
+     */
+    public void addArmorToInventory(String ownerNick, Armor armor) {
+        characterManager.addArmorToInventory(ownerNick, armor);
+    }
+
+    /**
+     * Elimina un arma del inventario de un usuario.
+     */
+    public void removeWeaponFromInventory(String ownerNick, Weapon weapon) {
+        characterManager.removeWeaponFromInventory(ownerNick, weapon);
+    }
+
+    /**
+     * Elimina una armadura del inventario de un usuario.
+     */
+    public void removeArmorFromInventory(String ownerNick, Armor armor) {
+        characterManager.removeArmorFromInventory(ownerNick, armor);
+    }
+
     // ==========================================
     // OTROS MÉTODOS GENERALES
     // ==========================================

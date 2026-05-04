@@ -135,7 +135,7 @@ public class CliInterface {
                     showAdminEditCharacterMenu();
                     break;
                 case "2":
-                    System.out.println("Funcionalidad de adición de elementos próximamente.");
+                    showAdminManageEquipmentMenu();
                     break;
                 case "3":
                     System.out.println("Funcionalidad de validación próximamente.");
@@ -846,6 +846,105 @@ public class CliInterface {
                 default:
                     System.out.println("Opción no válida.");
             }
+        }
+    }
+
+    private void showAdminManageEquipmentMenu() {
+        java.util.Map<String, Character> characters = app.getAllCharacters();
+        if (characters.isEmpty()) {
+            System.out.println("\nNo hay personajes registrados.");
+            return;
+        }
+
+        System.out.println("\n--- GESTIÓN DE EQUIPO ---");
+        List<String> owners = new ArrayList<>(characters.keySet());
+        for (int i = 0; i < owners.size(); i++) {
+            String owner = owners.get(i);
+            Character c = characters.get(owner);
+            System.out.println((i + 1) + ". " + c.getName() + " (" + owner + ")");
+        }
+        System.out.print("Seleccione un personaje (0 para cancelar): ");
+
+        try {
+            int index = Integer.parseInt(scanner.nextLine()) - 1;
+            if (index >= 0 && index < owners.size()) {
+                String owner = owners.get(index);
+                Character c = characters.get(owner);
+                
+                System.out.println("\n1. Añadir equipo desde catálogo");
+                System.out.println("2. Eliminar equipo existente");
+                System.out.print("Seleccione opción: ");
+                String opt = scanner.nextLine();
+                
+                if (opt.equals("1")) {
+                    showAdminAddEquipment(owner, c);
+                } else if (opt.equals("2")) {
+                    showAdminRemoveEquipment(owner, c);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void showAdminAddEquipment(String owner, Character character) {
+        List<String[]> catalog = app.getCatalog();
+        System.out.println("\n--- CATÁLOGO GLOBAL ---");
+        for (int i = 0; i < catalog.size(); i++) {
+            String[] item = catalog.get(i);
+            System.out.printf("%d. [%s] %s (Atk: %s, Def: %s)%n", 
+                i + 1, item[2].toUpperCase(), item[1], item[3], item[4]);
+        }
+        System.out.print("Seleccione objeto a añadir (0 para cancelar): ");
+
+        try {
+            int index = Integer.parseInt(scanner.nextLine()) - 1;
+            if (index >= 0 && index < catalog.size()) {
+                String[] item = catalog.get(index);
+                String name = item[1];
+                String type = item[2];
+                int atk = Integer.parseInt(item[3]);
+                int def = Integer.parseInt(item[4]);
+                boolean isOneHand = item[5].equals("1");
+
+                if (type.equals("weapon")) {
+                    app.addWeaponToInventory(owner, new Weapon(name, atk, def, isOneHand));
+                } else {
+                    app.addArmorToInventory(owner, new Armor(name, atk, def));
+                }
+                System.out.println("Objeto añadido con éxito.");
+            }
+        } catch (Exception e) {
+            System.out.println("Error al añadir objeto: " + e.getMessage());
+        }
+    }
+
+    private void showAdminRemoveEquipment(String owner, Character character) {
+        List<Weapon> weapons = character.getInventory().getWeapons();
+        List<Armor> armors = character.getInventory().getArmors();
+
+        System.out.println("\n--- EQUIPO ACTUAL DE " + character.getName() + " ---");
+        int count = 1;
+        for (Weapon w : weapons) {
+            System.out.println(count++ + ". [ARMA] " + w.getName());
+        }
+        for (Armor a : armors) {
+            System.out.println(count++ + ". [ARMADURA] " + a.getName());
+        }
+        System.out.print("Seleccione objeto a eliminar (0 para cancelar): ");
+
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice <= 0) return;
+
+            if (choice <= weapons.size()) {
+                app.removeWeaponFromInventory(owner, weapons.get(choice - 1));
+            } else if (choice <= weapons.size() + armors.size()) {
+                app.removeArmorFromInventory(owner, armors.get(choice - weapons.size() - 1));
+            }
+            System.out.println("Objeto eliminado con éxito.");
+        } catch (Exception e) {
+            System.out.println("Error al eliminar objeto: " + e.getMessage());
         }
     }
 }
