@@ -7,29 +7,37 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import main.java.urjc.metprog.models.user.UserBuilder;
 
+/**
+ * Implementación de la interfaz UserDao utilizando SQLite como motor de
+ * persistencia.
+ * Gestiona el ciclo de vida de los datos de usuario y su estado en el juego.
+ * 
+ * 
+ * @author Ivo Hagemann Martínez
+ * @version 1.0
+ */
 public class UserDaoImpl implements UserDao {
 
     @Override
     public void insertUser(User user) {
         String sql = "INSERT INTO usuarios (nick, name, password, num_reg, character_id, victories, role, is_blocked) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        
+
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, user.getNick());
             pstmt.setString(2, user.getName());
             pstmt.setString(3, user.getPassword());
             pstmt.setString(4, user.getRegistrationNumber());
-            
-            // Por defecto los usuarios se crean sin personaje (character_id = NULL)
+
             pstmt.setNull(5, java.sql.Types.INTEGER);
             pstmt.setInt(6, user.getVictories());
             pstmt.setString(7, user.getRole());
             pstmt.setInt(8, user.isBlocked() ? 1 : 0);
-            
+
             pstmt.executeUpdate();
             System.out.println("Usuario " + user.getNick() + " insertado correctamente en la base de datos.");
-            
+
         } catch (SQLException e) {
             System.err.println("Error al insertar usuario: " + e.getMessage());
             throw new RuntimeException("Error al registrar el usuario en la base de datos: " + e.getMessage());
@@ -38,27 +46,28 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void updateUser(User user) {
-        // Actualizamos nombre, contraseña, victorias, rol y bloqueo buscando al usuario por su nick (que es único)
+        // Actualizamos nombre, contraseña, victorias, rol y bloqueo buscando al usuario
+        // por su nick (que es único)
         String sql = "UPDATE usuarios SET name = ?, password = ?, victories = ?, role = ?, is_blocked = ? WHERE nick = ?";
-        
+
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, user.getName());
             pstmt.setString(2, user.getPassword());
             pstmt.setInt(3, user.getVictories());
             pstmt.setString(4, user.getRole());
             pstmt.setInt(5, user.isBlocked() ? 1 : 0);
             pstmt.setString(6, user.getNick());
-            
+
             int rowsAffected = pstmt.executeUpdate();
-            
+
             if (rowsAffected > 0) {
                 System.out.println("Usuario " + user.getNick() + " actualizado correctamente.");
             } else {
                 System.out.println("No se ha encontrado el usuario " + user.getNick() + " para actualizar.");
             }
-            
+
         } catch (SQLException e) {
             System.err.println("Error al actualizar usuario: " + e.getMessage());
         }
@@ -67,19 +76,19 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void deleteUser(String nick) {
         String sql = "DELETE FROM usuarios WHERE nick = ?";
-        
+
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, nick);
             int rowsAffected = pstmt.executeUpdate();
-            
+
             if (rowsAffected > 0) {
                 System.out.println("Usuario " + nick + " borrado correctamente.");
             } else {
                 System.out.println("No se ha encontrado el usuario " + nick + " para borrar.");
             }
-            
+
         } catch (SQLException e) {
             System.err.println("Error al borrar usuario: " + e.getMessage());
         }
@@ -89,8 +98,8 @@ public class UserDaoImpl implements UserDao {
     public User getUser(String nick) {
         String sql = "SELECT * FROM usuarios WHERE nick = ?";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, nick);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -115,7 +124,7 @@ public class UserDaoImpl implements UserDao {
     public User getUserByRegistrationNumber(String numReg) {
         String sql = "SELECT * FROM usuarios WHERE num_reg = ?";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, numReg);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -142,9 +151,9 @@ public class UserDaoImpl implements UserDao {
         java.util.List<User> ranking = new java.util.ArrayList<>();
         String sql = "SELECT * FROM usuarios ORDER BY victories DESC";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+
             while (rs.next()) {
                 ranking.add(new UserBuilder()
                         .setName(rs.getString("name"))
@@ -172,7 +181,7 @@ public class UserDaoImpl implements UserDao {
     public int getUserId(String nick) {
         String sql = "SELECT id FROM usuarios WHERE nick = ?";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, nick);
             try (ResultSet rs = pstmt.executeQuery()) {
