@@ -7,10 +7,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * Clase responsable de gestionar la conexión y la estructura de la base de datos SQLite.
+ * Centraliza la creación de tablas, la inicialización de datos base (catálogo)
+ * y proporciona conexiones al resto de la capa DAO.
+ * 
+ * @author Ivo Hagemann Martínez
+ * @version 1.0
+ */
 public class DatabaseManager {
 
-    // Ruta a la base de datos (se guardará en la carpeta data/ de la raíz del
-    // proyecto)
     private static final String DB_URL = "jdbc:sqlite:data/game_database.db";
 
     /**

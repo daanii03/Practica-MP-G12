@@ -21,9 +21,7 @@ public class UserDaoImpl implements UserDao {
             pstmt.setString(3, user.getPassword());
             pstmt.setString(4, user.getRegistrationNumber());
             
-            // TODO: Si el usuario ya tiene un personaje asociado al registrarse,
-            // aquí deberíamos guardar su ID. Por ahora, asumimos que el usuario
-            // se crea sin personaje y se le asigna después, por lo que insertamos NULL.
+            // Por defecto los usuarios se crean sin personaje (character_id = NULL)
             pstmt.setNull(5, java.sql.Types.INTEGER);
             pstmt.setInt(6, user.getVictories());
             pstmt.setString(7, user.getRole());
