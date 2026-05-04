@@ -261,6 +261,18 @@ public abstract class Character {
         this.minions.add(minion);
     }
 
+    /**
+     * Elimina un esbirro de la colección por su índice.
+     * @param index Índice del esbirro a eliminar.
+     * @throws IndexOutOfBoundsException Si el índice está fuera de rango.
+     */
+    public void removeMinion(int index) {
+        if (index < 0 || index >= this.minions.size()) {
+            throw new IndexOutOfBoundsException("Índice de esbirro fuera de rango: " + (index + 1));
+        }
+        this.minions.remove(index);
+    }
+
     /** @param weakness Debilidad a añadir a la colección. */
 
     public void addWeakness(Weakness weakness){

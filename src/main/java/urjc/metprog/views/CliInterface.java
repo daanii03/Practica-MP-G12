@@ -12,6 +12,11 @@ import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.equipment.Armor;
 import main.java.urjc.metprog.models.equipment.Weapon;
+import main.java.urjc.metprog.models.minions.Minion;
+import main.java.urjc.metprog.models.minions.HumanMinion;
+import main.java.urjc.metprog.models.minions.GhoulMinion;
+import main.java.urjc.metprog.models.minions.DemonMinion;
+import main.java.urjc.metprog.models.minions.Loyalty;
 
 /**
  * Interfaz de línea de comandos (CLI).
@@ -229,6 +234,7 @@ public class CliInterface {
             System.out.println("2. Registrar nuevo personaje");
             System.out.println("3. Eliminar personaje");
             System.out.println("4. Inventario");
+            System.out.println("5. Gestionar esbirros");
             System.out.println("0. Volver al menú principal");
             System.out.print("Seleccione una opción: ");
 
@@ -245,6 +251,9 @@ public class CliInterface {
                     break;
                 case "4":
                     showInventorySubMenu();
+                    break;
+                case "5":
+                    showPlayerMinionSubMenu();
                     break;
                 case "0":
                     back = true;
@@ -887,6 +896,8 @@ public class CliInterface {
                 
                 System.out.println("\n1. Añadir equipo desde catálogo");
                 System.out.println("2. Eliminar equipo existente");
+                System.out.println("3. Añadir esbirro");
+                System.out.println("4. Eliminar esbirro");
                 System.out.print("Seleccione opción: ");
                 String opt = scanner.nextLine();
                 
@@ -894,6 +905,10 @@ public class CliInterface {
                     showAdminAddEquipment(owner, c);
                 } else if (opt.equals("2")) {
                     showAdminRemoveEquipment(owner, c);
+                } else if (opt.equals("3")) {
+                    showAddMinionMenu(owner);
+                } else if (opt.equals("4")) {
+                    showDeleteMinionMenu(owner);
                 }
             }
         } catch (Exception e) {
@@ -1012,6 +1027,221 @@ public class CliInterface {
                 }
             }
         } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // ==========================================
+    // SUBMENÚ DE ESBIRROS (JUGADOR)
+    // ==========================================
+
+    private void showPlayerMinionSubMenu() {
+        boolean back = false;
+        while (!back) {
+            System.out.println("\n--- GESTIÓN DE ESBIRROS ---");
+            System.out.println("1. Ver esbirros");
+            System.out.println("2. Añadir esbirro");
+            System.out.println("3. Eliminar esbirro");
+            System.out.println("0. Volver");
+            System.out.print("Seleccione una opción: ");
+
+            String option = scanner.nextLine();
+            switch (option) {
+                case "1":
+                    displayMinions();
+                    break;
+                case "2":
+                    showAddMinionMenu(null);
+                    break;
+                case "3":
+                    showDeleteMinionMenu(null);
+                    break;
+                case "0":
+                    back = true;
+                    break;
+                default:
+                    System.out.println("Opción no válida.");
+            }
+        }
+    }
+
+    private void displayMinions() {
+        try {
+            List<Minion> minions = app.getCurrentUserMinions();
+            System.out.println("\n=== ESBIRROS ===");
+            if (minions.isEmpty()) {
+                System.out.println("  (No tienes esbirros)");
+                return;
+            }
+            printMinionList(minions);
+        } catch (IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Muestra la lista de esbirros formateada.
+     */
+    private void printMinionList(List<Minion> minions) {
+        for (int i = 0; i < minions.size(); i++) {
+            Minion m = minions.get(i);
+            StringBuilder info = new StringBuilder();
+            info.append(String.format("  %d. %s (Vida: %d", i + 1, m.getName(), m.getHealth()));
+
+            if (m instanceof HumanMinion) {
+                HumanMinion hm = (HumanMinion) m;
+                info.append(" | Tipo: Humano | Lealtad: ").append(hm.getLoyalty());
+            } else if (m instanceof GhoulMinion) {
+                GhoulMinion gm = (GhoulMinion) m;
+                info.append(" | Tipo: Ghoul | Dependencia: ").append(gm.getDependence());
+            } else if (m instanceof DemonMinion) {
+                DemonMinion dm = (DemonMinion) m;
+                info.append(" | Tipo: Demonio | Pacto: ").append(dm.getPactDescription());
+                info.append(" | Subordinados: ").append(dm.getMinions().size());
+            }
+            info.append(")");
+            System.out.println(info.toString());
+        }
+    }
+
+    /**
+     * Menú para añadir un esbirro. Si ownerNick es null, se añade al usuario actual.
+     * Si ownerNick tiene valor, se añade al personaje de ese usuario (modo admin).
+     */
+    private void showAddMinionMenu(String ownerNick) {
+        System.out.println("\n--- AÑADIR ESBIRRO ---");
+        System.out.println("Tipo de esbirro:");
+        System.out.println("1. Humano");
+        System.out.println("2. Ghoul");
+        System.out.println("3. Demonio");
+        System.out.println("0. Cancelar");
+        System.out.print("Seleccione tipo: ");
+
+        String typeOpt = scanner.nextLine();
+        if (typeOpt.equals("0")) {
+            System.out.println("Operación cancelada.");
+            return;
+        }
+
+        // Datos comunes
+        System.out.print("Nombre del esbirro: ");
+        String name = scanner.nextLine().trim();
+        if (name.isEmpty()) {
+            System.out.println("El nombre no puede estar vacío.");
+            return;
+        }
+
+        System.out.print("Puntos de vida (1-3): ");
+        int health;
+        try {
+            health = Integer.parseInt(scanner.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Valor de vida no válido.");
+            return;
+        }
+
+        Minion minion = null;
+        try {
+            switch (typeOpt) {
+                case "1": // Humano
+                    System.out.println("Nivel de lealtad:");
+                    System.out.println("1. ALTA");
+                    System.out.println("2. NORMAL");
+                    System.out.println("3. BAJA");
+                    System.out.print("Seleccione lealtad: ");
+                    String loyaltyOpt = scanner.nextLine();
+                    Loyalty loyalty;
+                    switch (loyaltyOpt) {
+                        case "1": loyalty = Loyalty.ALTA; break;
+                        case "2": loyalty = Loyalty.NORMAL; break;
+                        case "3": loyalty = Loyalty.BAJA; break;
+                        default:
+                            System.out.println("Opción de lealtad no válida.");
+                            return;
+                    }
+                    minion = new HumanMinion(name, health, loyalty);
+                    break;
+
+                case "2": // Ghoul
+                    System.out.print("Nivel de dependencia (1-5): ");
+                    int dependence;
+                    try {
+                        dependence = Integer.parseInt(scanner.nextLine().trim());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Valor de dependencia no válido.");
+                        return;
+                    }
+                    minion = new GhoulMinion(name, health, dependence);
+                    break;
+
+                case "3": // Demonio
+                    System.out.print("Descripción del pacto: ");
+                    String pact = scanner.nextLine().trim();
+                    if (pact.isEmpty()) {
+                        System.out.println("La descripción del pacto no puede estar vacía.");
+                        return;
+                    }
+                    minion = new DemonMinion(name, health, pact);
+                    break;
+
+                default:
+                    System.out.println("Tipo de esbirro no válido.");
+                    return;
+            }
+
+            if (ownerNick == null) {
+                app.addMinionToCurrentUser(minion);
+            } else {
+                app.addMinionToCharacter(ownerNick, minion);
+            }
+            System.out.println("Esbirro '" + minion.getName() + "' añadido correctamente.");
+
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Error al crear el esbirro: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Menú para eliminar un esbirro. Si ownerNick es null, se elimina del usuario actual.
+     * Si ownerNick tiene valor, se elimina del personaje de ese usuario (modo admin).
+     */
+    private void showDeleteMinionMenu(String ownerNick) {
+        try {
+            List<Minion> minions;
+            if (ownerNick == null) {
+                minions = app.getCurrentUserMinions();
+            } else {
+                Character c = app.getAllCharacters().get(ownerNick);
+                if (c == null) {
+                    System.out.println("El usuario no tiene personaje.");
+                    return;
+                }
+                minions = c.getMinions();
+            }
+
+            if (minions.isEmpty()) {
+                System.out.println("\nNo hay esbirros que eliminar.");
+                return;
+            }
+
+            System.out.println("\n--- ELIMINAR ESBIRRO ---");
+            printMinionList(minions);
+            System.out.print("Seleccione el esbirro a eliminar (0 para cancelar): ");
+
+            int choice = Integer.parseInt(scanner.nextLine().trim());
+            if (choice <= 0) return;
+
+            int index = choice - 1;
+            if (ownerNick == null) {
+                app.deleteMinionFromCurrentUser(index);
+            } else {
+                app.deleteMinionFromCharacter(ownerNick, index);
+            }
+            System.out.println("Esbirro eliminado correctamente.");
+
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Introduce un número válido.");
+        } catch (IndexOutOfBoundsException | IllegalArgumentException | IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }

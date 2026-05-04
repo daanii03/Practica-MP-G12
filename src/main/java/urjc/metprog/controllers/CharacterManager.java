@@ -283,4 +283,20 @@ public class CharacterManager {
             updateCharacter(ownerNick, character);
         }
     }
+
+    /**
+     * Elimina un esbirro del personaje de un usuario por su índice.
+     *
+     * @param ownerNick Nick del usuario dueño del personaje.
+     * @param minionIndex Índice del esbirro a eliminar (0-based).
+     */
+    public void deleteMinion(String ownerNick, int minionIndex) {
+        Character character = getCharacterByUser(ownerNick);
+        if (character != null) {
+            character.removeMinion(minionIndex);
+            updateCharacter(ownerNick, character);
+        } else {
+            throw new IllegalArgumentException("El usuario especificado no tiene personaje.");
+        }
+    }
 }

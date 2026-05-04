@@ -15,6 +15,7 @@ import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.equipment.Armor;
 import main.java.urjc.metprog.models.equipment.Weapon;
+import main.java.urjc.metprog.models.minions.Minion;
 
 /**
  * Controlador principal de la aplicación.
@@ -364,9 +365,54 @@ public class Application {
         return userManager.getRanking();
     }
 
-    // Placeholders para futuras funcionalidades
-    public void chooseSkill(String skillName) {}
-    public void selectMinions(List<String> minionNames) {}
+    // ==========================================
+    // MÉTODOS DE GESTIÓN DE ESBIRROS
+    // ==========================================
+
+    /**
+     * Obtiene la lista de esbirros del personaje del usuario actual.
+     * @return Lista de esbirros del personaje.
+     */
+    public List<Minion> getCurrentUserMinions() {
+        Character character = requireCurrentCharacter();
+        return character.getMinions();
+    }
+
+    /**
+     * Añade un esbirro al personaje del usuario actual.
+     * @param minion El esbirro a añadir.
+     */
+    public void addMinionToCurrentUser(Minion minion) {
+        requireCurrentCharacter();
+        characterManager.addMinion(currentUser.getNick(), minion);
+    }
+
+    /**
+     * Elimina un esbirro del personaje del usuario actual por su índice.
+     * @param minionIndex Índice del esbirro a eliminar (0-based).
+     */
+    public void deleteMinionFromCurrentUser(int minionIndex) {
+        requireCurrentCharacter();
+        characterManager.deleteMinion(currentUser.getNick(), minionIndex);
+    }
+
+    /**
+     * Añade un esbirro al personaje de cualquier usuario (operador).
+     * @param ownerNick Nick del dueño del personaje.
+     * @param minion El esbirro a añadir.
+     */
+    public void addMinionToCharacter(String ownerNick, Minion minion) {
+        characterManager.addMinion(ownerNick, minion);
+    }
+
+    /**
+     * Elimina un esbirro del personaje de cualquier usuario (operador).
+     * @param ownerNick Nick del dueño del personaje.
+     * @param minionIndex Índice del esbirro a eliminar (0-based).
+     */
+    public void deleteMinionFromCharacter(String ownerNick, int minionIndex) {
+        characterManager.deleteMinion(ownerNick, minionIndex);
+    }
 
     // ==========================================
     // MÉTODOS DE DESAFÍOS
