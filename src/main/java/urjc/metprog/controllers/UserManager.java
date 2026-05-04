@@ -196,4 +196,15 @@ public class UserManager {
     public java.util.List<User> getRanking() {
         return userDao.getGlobalRanking();
     }
+
+    /**
+     * Busca un usuario en la BD por su nick y lo devuelve.
+     * Devuelve null si no existe.
+     *
+     * @param nick Nick del usuario a buscar.
+     * @return El objeto User, o null si no se encuentra.
+     */
+    public User getUserByNick(String nick) {
+        return userDao.getUser(nick);
+    }
 }

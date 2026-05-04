@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import main.java.urjc.metprog.controllers.Application;
+import main.java.urjc.metprog.models.challenges.Challenge;
+import main.java.urjc.metprog.models.challenges.CombatResult;
 import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.equipment.Armor;
@@ -89,18 +91,28 @@ public class CliInterface {
     private void showPlayerMenu() {
         boolean logout = false;
         while (!logout) {
+            // Advertencia si hay un desafío pendiente de respuesta
+            if (app.hasPendingChallenge()) {
+                Challenge pending = app.getPendingChallengeForCurrentUser();
+                System.out.println("\n  *** ATENCIÓN: Tienes un desafío pendiente de "
+                        + pending.getChallenger().getNick() + " ***");
+            }
+
             System.out.println("\n--- MENÚ PRINCIPAL ---");
             System.out.println("1. Gestionar Personaje");
-            System.out.println("2. Buscar Desafíos (Próximamente)");
+            System.out.println("2. Desafíos");
             System.out.println("3. Ver Ranking Global");
             System.out.println("4. Darse de baja (Eliminar cuenta)");
             System.out.println("0. Cerrar sesión");
             System.out.print("Seleccione una opción: ");
-            
+
             String option = scanner.nextLine();
             switch (option) {
                 case "1":
                     showCharacterSubMenu();
+                    break;
+                case "2":
+                    showChallengeSubMenu();
                     break;
                 case "3":
                     showGlobalRanking();
@@ -116,7 +128,7 @@ public class CliInterface {
                     logout = true;
                     break;
                 default:
-                    System.out.println("Opción no válida o función aún no implementada.");
+                    System.out.println("Opción no válida.");
             }
         }
     }
@@ -466,5 +478,183 @@ public class CliInterface {
             System.out.println("Operación cancelada.");
         }
         return false;
+    }
+
+    // ==========================================
+    // SUBMENÚ DE DESAFÍOS
+    // ==========================================
+
+    private void showChallengeSubMenu() {
+        boolean back = false;
+        while (!back) {
+            System.out.println("\n--- DESAFÍOS ---");
+            System.out.println("1. Desafiar a un jugador");
+            System.out.println("2. Responder a desafío pendiente");
+            System.out.println("3. Ver mi historial de combates");
+            System.out.println("0. Volver");
+            System.out.print("Seleccione una opción: ");
+
+            String option = scanner.nextLine();
+            switch (option) {
+                case "1":
+                    showChallengeSendMenu();
+                    break;
+                case "2":
+                    showChallengeRespondMenu();
+                    break;
+                case "3":
+                    showChallengeHistory();
+                    break;
+                case "0":
+                    back = true;
+                    break;
+                default:
+                    System.out.println("Opción no válida.");
+            }
+        }
+    }
+
+    /**
+     * Flujo para que el usuario actual desafíe a otro jugador.
+     */
+    private void showChallengeSendMenu() {
+        System.out.println("\n--- DESAFIAR A UN JUGADOR ---");
+        System.out.print("Nick del jugador a desafiar: ");
+        String nick = scanner.nextLine().trim();
+
+        System.out.print("Cantidad de oro a apostar: ");
+        String goldStr = scanner.nextLine().trim();
+
+        try {
+            int gold = Integer.parseInt(goldStr);
+            Challenge challenge = app.challengePlayer(nick, gold);
+            System.out.println("\nDesafío enviado correctamente a '" + nick + "'.");
+            System.out.println("Estado: PENDIENTE DE VALIDACIÓN por un operador.");
+            System.out.println("Oro apostado: " + challenge.getGoldBet());
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Introduce una cantidad de oro válida.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Flujo para que el usuario acepte o rechace un desafío publicado dirigido a él.
+     */
+    private void showChallengeRespondMenu() {
+        Challenge challenge = app.getPendingChallengeForCurrentUser();
+        if (challenge == null) {
+            System.out.println("\nNo tienes ningún desafío pendiente de respuesta.");
+            return;
+        }
+
+        System.out.println("\n--- DESAFÍO PENDIENTE ---");
+        System.out.printf("De:          %s%n", challenge.getChallenger().getNick());
+        System.out.printf("Oro apostado: %d%n", challenge.getGoldBet());
+        System.out.printf("Fecha:       %s%n", challenge.getCreatedAt());
+        System.out.println("\nSi rechazas, pagas el 10%% del oro apostado (" 
+                + (int) Math.ceil(challenge.getGoldBet() * 0.1) + " de oro).");
+        System.out.print("\n¿Aceptas el desafío? (S = Aceptar / N = Rechazar): ");
+        String answer = scanner.nextLine().trim();
+
+        if (answer.equalsIgnoreCase("S")) {
+            try {
+                CombatResult result = app.acceptChallenge();
+                displayCombatResult(result);
+            } catch (IllegalStateException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } else if (answer.equalsIgnoreCase("N")) {
+            try {
+                app.rejectChallenge();
+                int penalty = (int) Math.ceil(challenge.getGoldBet() * 0.1);
+                System.out.println("Desafío rechazado. Se han descontado " + penalty + " de oro de tu personaje.");
+            } catch (IllegalStateException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Opción no válida. Volviendo al menú.");
+        }
+    }
+
+    /**
+     * Muestra el resultado del combate ronda a ronda y el resumen final.
+     */
+    private void displayCombatResult(CombatResult result) {
+        System.out.println("\n========================================");
+        System.out.println("           RESULTADO DEL COMBATE        ");
+        System.out.println("========================================");
+
+        // Log de rondas
+        System.out.println("\n--- Desarrollo del combate ---");
+        for (String log : result.getRoundLog()) {
+            System.out.println("  " + log);
+        }
+
+        // Resultado final
+        System.out.println("\n--- Resultado final ---");
+        System.out.println("Rondas jugadas: " + result.getRounds());
+
+        if (result.isDraw()) {
+            System.out.println("¡EMPATE! No se transfiere oro.");
+        } else {
+            System.out.println("GANADOR: " + result.getWinnerUser().getNick());
+            System.out.println("PERDEDOR: " + result.getLoserUser().getNick());
+            System.out.println("Oro transferido: " + result.getGoldWon());
+        }
+        System.out.println("========================================");
+    }
+
+    /**
+     * Muestra el historial de combates del usuario actual desde la base de datos.
+     */
+    private void showChallengeHistory() {
+        try {
+            List<String[]> history = app.getChallengeHistory();
+
+            System.out.println("\n=== HISTORIAL DE COMBATES ===");
+            if (history.isEmpty()) {
+                System.out.println("Aún no has participado en ningún combate.");
+                return;
+            }
+
+            String currentNick = app.getCurrentUser().getNick();
+            int wins = 0, losses = 0, draws = 0;
+
+            System.out.printf("%-4s %-15s %-15s %-6s %-12s %-22s %-6s%n",
+                    "#", "Retador", "Desafiado", "Rondas", "Resultado", "Fecha", "Oro");
+            System.out.println("-".repeat(85));
+
+            int i = 1;
+            for (String[] row : history) {
+                String challenger = row[0];
+                String challenged = row[1];
+                String rounds     = row[2];
+                String date       = row[3] != null ? row[3].substring(0, 16).replace("T", " ") : "--";
+                String winnerNick = row[4]; // null = empate
+                String gold       = row[5];
+
+                String resultado;
+                if (winnerNick == null) {
+                    resultado = "Empate";
+                    draws++;
+                } else if (winnerNick.equals(currentNick)) {
+                    resultado = "Victoria";
+                    wins++;
+                } else {
+                    resultado = "Derrota";
+                    losses++;
+                }
+
+                System.out.printf("%-4d %-15s %-15s %-6s %-12s %-22s %-6s%n",
+                        i++, challenger, challenged, rounds, resultado, date, gold + " oro");
+            }
+
+            System.out.println("-".repeat(85));
+            System.out.printf("Victorias: %d | Derrotas: %d | Empates: %d%n", wins, losses, draws);
+
+        } catch (IllegalStateException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }

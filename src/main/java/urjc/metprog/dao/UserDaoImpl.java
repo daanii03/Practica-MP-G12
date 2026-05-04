@@ -162,4 +162,28 @@ public class UserDaoImpl implements UserDao {
         }
         return ranking;
     }
+
+    /**
+     * Obtiene el ID numérico de la base de datos de un usuario por su nick.
+     * Necesario para operaciones que usan IDs enteros (como ChallengeDao).
+     *
+     * @param nick Nick del usuario.
+     * @return El ID del usuario, o -1 si no existe.
+     */
+    public int getUserId(String nick) {
+        String sql = "SELECT id FROM usuarios WHERE nick = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, nick);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener el ID del usuario: " + e.getMessage());
+        }
+        return -1;
+    }
 }

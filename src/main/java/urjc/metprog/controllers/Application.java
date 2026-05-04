@@ -1,9 +1,15 @@
 package main.java.urjc.metprog.controllers;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import main.java.urjc.metprog.dao.ChallengeDaoImpl;
 import main.java.urjc.metprog.dao.DatabaseManager;
 import main.java.urjc.metprog.dao.CharacterDaoImpl;
 import main.java.urjc.metprog.dao.UserDaoImpl;
+import main.java.urjc.metprog.models.challenges.Challenge;
+import main.java.urjc.metprog.models.challenges.Combat;
+import main.java.urjc.metprog.models.challenges.CombatResult;
 import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.equipment.Armor;
@@ -19,6 +25,7 @@ public class Application {
     
     private CharacterManager characterManager;
     private UserManager userManager;
+    private ChallengeDaoImpl challengeDao;
     private User currentUser;
 
     public Application() {
@@ -31,6 +38,7 @@ public class Application {
         DatabaseManager.createTables();
         this.characterManager = new CharacterManager(new CharacterDaoImpl());
         this.userManager = new UserManager(new UserDaoImpl());
+        this.challengeDao = new ChallengeDaoImpl();
     }
 
     // ==========================================
@@ -247,8 +255,226 @@ public class Application {
     // Placeholders para futuras funcionalidades
     public void chooseSkill(String skillName) {}
     public void selectMinions(List<String> minionNames) {}
-    public void challengePlayer(String opponentNick, int goldBet) {}
-    public void acceptChallenge(String challengeId) {}
-    public void rejectChallenge(String challengeId) {}
-    public void startCombat() {}
+
+    // ==========================================
+    // MÉTODOS DE DESAFÍOS
+    // ==========================================
+
+    /**
+     * El usuario actual desafía al jugador con el nick indicado.
+     * Crea el desafío en estado PENDING_VALIDATION y lo registra en el ChallengeManager.
+     *
+     * Validaciones previas:
+     * - El usuario actual debe tener personaje.
+     * - El desafiado debe existir y tener personaje.
+     * - El desafiado NO puede haber perdido un combate en las últimas 24 horas.
+     * - El desafiador debe tener suficiente oro.
+     * - Ninguno puede tener ya un desafío activo (PENDING o PUBLISHED).
+     *
+     * @param challengedNick Nick del jugador a desafiar.
+     * @param goldBet        Cantidad de oro apostada.
+     * @return El desafío creado.
+     */
+    public Challenge challengePlayer(String challengedNick, int goldBet) {
+        if (currentUser == null) {
+            throw new IllegalStateException("Debes iniciar sesión para desafiar a otro jugador.");
+        }
+
+        // Obtener personaje del retador y asignarlo al objeto User
+        Character challengerChar = characterManager.getCharacterByUser(currentUser.getNick());
+        if (challengerChar == null) {
+            throw new IllegalStateException("Debes tener un personaje creado para poder desafiar.");
+        }
+        currentUser.setCharacter(challengerChar);
+
+        // Verificar que el retador no tenga ya un desafío activo
+        if (ChallengeManager.getInstance().hasActiveChallenge(currentUser)) {
+            throw new IllegalStateException("Ya tienes un desafío activo pendiente de resolución.");
+        }
+
+        // Obtener el usuario desafiado
+        User challenged = userManager.getUserByNick(challengedNick);
+        if (challenged == null) {
+            throw new IllegalArgumentException("No existe ningún jugador con el nick '" + challengedNick + "'.");
+        }
+        if (challenged.getNick().equals(currentUser.getNick())) {
+            throw new IllegalArgumentException("No puedes desafiarte a ti mismo.");
+        }
+
+        // Cargar el personaje del desafiado (necesario para la regla de las 24h y para el combate)
+        Character challengedChar = characterManager.getCharacterByUser(challengedNick);
+        if (challengedChar == null) {
+            throw new IllegalStateException("El jugador '" + challengedNick + "' no tiene personaje y no puede ser desafiado.");
+        }
+        challenged.setCharacter(challengedChar);
+
+        // Comprobar que el desafiado no perdió un combate en las últimas 24 horas
+        // (obtenemos su userId desde la BD y consultamos el historial)
+        LocalDateTime lastLoss = challengeDao.getLastLossDate(getUserIdByNick(challengedNick));
+        if (lastLoss != null && lastLoss.isAfter(LocalDateTime.now().minusHours(24))) {
+            throw new IllegalStateException(
+                "'" + challengedNick + "' perdió un combate hace menos de 24 horas y no puede ser desafiado todavía.");
+        }
+
+        // Verificar que el desafiado no tenga ya un desafío activo
+        if (ChallengeManager.getInstance().hasActiveChallenge(challenged)) {
+            throw new IllegalStateException("El jugador '" + challengedNick + "' ya tiene un desafío activo.");
+        }
+
+        // Crear y registrar el desafío (la propia clase Challenge valida el oro)
+        Challenge challenge = new Challenge(currentUser, challenged, goldBet);
+        ChallengeManager.getInstance().save(challenge);
+        return challenge;
+    }
+
+    /**
+     * Comprueba si el usuario actual tiene un desafío publicado (PUBLISHED) esperando su respuesta.
+     * La CLI puede usar esto para bloquear el resto de opciones de menú.
+     *
+     * @return true si hay un desafío publicado dirigido al usuario actual.
+     */
+    public boolean hasPendingChallenge() {
+        if (currentUser == null) return false;
+        return ChallengeManager.getInstance()
+                .findPublishedChallengeForUser(currentUser)
+                .isPresent();
+    }
+
+    /**
+     * Obtiene el desafío publicado que está esperando la respuesta del usuario actual.
+     * Devuelve null si no hay ninguno.
+     *
+     * @return El desafío pendiente, o null.
+     */
+    public Challenge getPendingChallengeForCurrentUser() {
+        if (currentUser == null) return null;
+        return ChallengeManager.getInstance()
+                .findPublishedChallengeForUser(currentUser)
+                .orElse(null);
+    }
+
+    /**
+     * Devuelve todos los desafíos pendientes de validación por el operador.
+     * Solo debería ser llamado desde la interfaz del administrador.
+     *
+     * @return Lista de desafíos en estado PENDING_VALIDATION.
+     */
+    public List<Challenge> getPendingChallengesForValidation() {
+        return ChallengeManager.getInstance().findPendingValidation();
+    }
+
+    /**
+     * (Acción de operador) Valida un desafío pendiente y lo publica para que el desafiado pueda responder.
+     * El operador puede aplicar modificadores de combate activos (fortalezas/debilidades del escenario).
+     *
+     * @param challenge       El desafío a validar.
+     * @param activeModifiers Modificadores de escenario que el operador decide activar (puede ser null).
+     */
+    public void validateChallenge(Challenge challenge, Map<String, Integer> activeModifiers) {
+        userManager.validateChallenge(challenge, activeModifiers);
+    }
+
+    /**
+     * El usuario actual acepta el desafío que tiene pendiente.
+     * Ejecuta el combate de forma automática y persiste el resultado.
+     *
+     * @return El resultado del combate.
+     */
+    public CombatResult acceptChallenge() {
+        Challenge challenge = getPendingChallengeForCurrentUser();
+        if (challenge == null) {
+            throw new IllegalStateException("No tienes ningún desafío pendiente de aceptar.");
+        }
+
+        // Asegurarse de que los personajes están cargados en los objetos User
+        challenge.getChallenger().setCharacter(
+                characterManager.getCharacterByUser(challenge.getChallenger().getNick()));
+        challenge.getChallenged().setCharacter(
+                characterManager.getCharacterByUser(challenge.getChallenged().getNick()));
+
+        challenge.accept();
+
+        // Ejecutar el combate
+        UserDaoImpl userDaoImpl = new UserDaoImpl();
+        Combat combat = new Combat(challenge, userDaoImpl);
+        CombatResult result = combat.run();
+
+        // Persistir el resultado en la base de datos
+        User winner = result.getWinnerUser();
+        Integer winnerId = winner != null ? getUserIdByNick(winner.getNick()) : null;
+        challengeDao.addChallenge(
+                getUserIdByNick(challenge.getChallenger().getNick()),
+                getUserIdByNick(challenge.getChallenged().getNick()),
+                result.getRounds(),
+                result.getDate().toString(),
+                winnerId,
+                result.challengerHasSurvivingMinions() ? 1 : 0,
+                result.challengedHasSurvivingMinions() ? 1 : 0,
+                result.getGoldWon()
+        );
+
+        // Actualizar los personajes en la BD (el oro y la vida han cambiado tras el combate)
+        characterManager.updateCharacter(
+                challenge.getChallenger().getNick(), challenge.getChallenger().getCharacter());
+        characterManager.updateCharacter(
+                challenge.getChallenged().getNick(), challenge.getChallenged().getCharacter());
+
+        return result;
+    }
+
+    /**
+     * El usuario actual rechaza el desafío que tiene pendiente.
+     * Aplica la penalización del 10% del oro apostado (ya gestionada por Challenge.reject()).
+     */
+    public void rejectChallenge() {
+        Challenge challenge = getPendingChallengeForCurrentUser();
+        if (challenge == null) {
+            throw new IllegalStateException("No tienes ningún desafío pendiente de rechazar.");
+        }
+
+        // Asegurarse de que los personajes están cargados para aplicar la penalización de oro
+        challenge.getChallenger().setCharacter(
+                characterManager.getCharacterByUser(challenge.getChallenger().getNick()));
+        challenge.getChallenged().setCharacter(
+                characterManager.getCharacterByUser(challenge.getChallenged().getNick()));
+
+        challenge.reject(); // Aplica el 10% de penalización en oro
+
+        // Persistir los cambios de oro en ambos personajes
+        characterManager.updateCharacter(
+                challenge.getChallenger().getNick(), challenge.getChallenger().getCharacter());
+        characterManager.updateCharacter(
+                challenge.getChallenged().getNick(), challenge.getChallenged().getCharacter());
+    }
+
+    /**
+     * Obtiene el historial de combates del usuario actual.
+     * Cada elemento contiene: [challenger_nick, challenged_nick, rounds, combat_date, winner_nick, gold_won].
+     * winner_nick es null si fue empate.
+     *
+     * @return Lista con los datos de cada combate.
+     */
+    public List<String[]> getChallengeHistory() {
+        if (currentUser == null) {
+            throw new IllegalStateException("Debes iniciar sesión para ver tu historial.");
+        }
+        int userId = getUserIdByNick(currentUser.getNick());
+        return challengeDao.getChallengeHistoryByUser(userId);
+    }
+
+    // ==========================================
+    // MÉTODO AUXILIAR PRIVADO
+    // ==========================================
+
+
+    /**
+     * Obtiene el ID de base de datos de un usuario dado su nick.
+     * Necesario para operaciones con ChallengeDao que trabajan con IDs numéricos.
+     *
+     * @param nick Nick del usuario.
+     * @return El ID del usuario, o -1 si no se encuentra.
+     */
+    private int getUserIdByNick(String nick) {
+        return new UserDaoImpl().getUserId(nick);
+    }
 }

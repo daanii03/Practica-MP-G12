@@ -2,7 +2,9 @@ package main.java.urjc.metprog.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 public class ChallengeDaoImpl implements ChallengeDao {
 
@@ -96,5 +98,77 @@ public class ChallengeDaoImpl implements ChallengeDao {
         } catch (SQLException e) {
             System.err.println("Error al borrar el desafío: " + e.getMessage());
         }
+    }
+
+    @Override
+    public LocalDateTime getLastLossDate(int userId) {
+        // Busca el combate más reciente donde el usuario participó pero NO fue el ganador
+        String sql = "SELECT combat_date FROM desafios "
+                   + "WHERE (challenger_id = ? OR challenged_id = ?) "
+                   + "AND winner_id IS NOT NULL "
+                   + "AND winner_id != ? "
+                   + "ORDER BY combat_date DESC LIMIT 1";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, userId);
+            pstmt.setInt(3, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String dateStr = rs.getString("combat_date");
+                    return LocalDateTime.parse(dateStr);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al consultar la última derrota del usuario: " + e.getMessage());
+        }
+        return null; // Nunca ha perdido o no tiene historial
+    }
+
+    @Override
+    public java.util.List<String[]> getChallengeHistoryByUser(int userId) {
+        java.util.List<String[]> history = new java.util.ArrayList<>();
+
+        // JOIN triple: desafios + usuarios (challenger) + usuarios (challenged) + usuarios (winner opcional)
+        String sql = "SELECT "
+                   + "  uc.nick  AS challenger_nick, "
+                   + "  ud.nick  AS challenged_nick, "
+                   + "  d.rounds_played, "
+                   + "  d.combat_date, "
+                   + "  uw.nick  AS winner_nick, "
+                   + "  d.gold_won "
+                   + "FROM desafios d "
+                   + "JOIN usuarios uc ON d.challenger_id = uc.id "
+                   + "JOIN usuarios ud ON d.challenged_id = ud.id "
+                   + "LEFT JOIN usuarios uw ON d.winner_id  = uw.id "
+                   + "WHERE d.challenger_id = ? OR d.challenged_id = ? "
+                   + "ORDER BY d.combat_date DESC";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String[] row = {
+                        rs.getString("challenger_nick"),   // [0]
+                        rs.getString("challenged_nick"),   // [1]
+                        String.valueOf(rs.getInt("rounds_played")), // [2]
+                        rs.getString("combat_date"),       // [3]
+                        rs.getString("winner_nick"),       // [4] null = empate
+                        String.valueOf(rs.getInt("gold_won")) // [5]
+                    };
+                    history.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener el historial de combates: " + e.getMessage());
+        }
+        return history;
     }
 }
