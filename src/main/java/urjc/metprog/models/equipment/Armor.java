@@ -24,4 +24,23 @@ public class Armor extends Equipment{
     public Armor(String name, int attackModifier, int defenseModifier) {
         super(name, attackModifier, defenseModifier);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Es exactamente el mismo objeto en memoria
+        if (obj == null || getClass() != obj.getClass()) return false; // No son del mismo tipo
+
+        Armor armor = (Armor) obj;
+
+        // Comparamos que tengan el mismo nombre y stats
+        // Asumo que tienes los métodos getName(), getAttackModifier() y getDefenseModifier() heredados de Equipment
+        return this.getAttackModifier() == armor.getAttackModifier() &&
+                this.getDefenseModifier() == armor.getDefenseModifier() &&
+                this.getName().equals(armor.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(getName(), getAttackModifier(), getDefenseModifier());
+    }
 }

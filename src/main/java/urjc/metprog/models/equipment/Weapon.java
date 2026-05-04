@@ -57,4 +57,24 @@ public class Weapon extends Equipment {
     public void setOneHandWeapon(boolean oneHandWeapon) {
         isOneHandWeapon = oneHandWeapon;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true; // Es exactamente el mismo objeto en memoria
+        if (obj == null || getClass() != obj.getClass()) return false; // No son del mismo tipo
+
+        Weapon weapon = (Weapon) obj;
+
+        // Comparamos que tengan el mismo nombre, stats y tipo de agarre
+        // Asumo que tienes los métodos getName(), getAttackModifier() y getDefenseModifier() heredados de Equipment
+        return this.isOneHandWeapon == weapon.isOneHandWeapon &&
+                this.getAttackModifier() == weapon.getAttackModifier() &&
+                this.getDefenseModifier() == weapon.getDefenseModifier() &&
+                this.getName().equals(weapon.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(getName(), getAttackModifier(), getDefenseModifier(), isOneHandWeapon);
+    }
 }
