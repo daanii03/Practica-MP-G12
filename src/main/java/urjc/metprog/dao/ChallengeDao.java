@@ -34,4 +34,11 @@
          * @return Lista de arrays con los datos de cada combate.
          */
         java.util.List<String[]> getChallengeHistoryByUser(int userId);
+
+        /**
+         * Obtiene todos los desafíos pendientes de validación o publicados desde la base de datos.
+         *
+         * @return Lista de arrays con los datos de cada desafío pendiente.
+         */
+        java.util.List<String[]> getPendingChallengesFromDb();
     }
