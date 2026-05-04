@@ -34,6 +34,7 @@ public class UserDaoImpl implements UserDao {
             
         } catch (SQLException e) {
             System.err.println("Error al insertar usuario: " + e.getMessage());
+            throw new RuntimeException("Error al registrar el usuario en la base de datos: " + e.getMessage());
         }
     }
 

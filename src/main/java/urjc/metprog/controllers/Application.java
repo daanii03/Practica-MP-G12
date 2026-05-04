@@ -59,12 +59,16 @@ public class Application {
         return user;
     }
 
-    /**
-     * Registra un nuevo jugador.
-     * @return El usuario recién creado.
-     */
     public User registerUser(String name, String nick, String password) {
         return userManager.signUp(name, nick, password);
+    }
+
+    /**
+     * Registra un nuevo operador (administrador).
+     * @return El usuario recién creado.
+     */
+    public User registerOperator(String name, String nick, String password) {
+        return userManager.signUpOperator(name, nick, password);
     }
 
     /**

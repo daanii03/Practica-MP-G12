@@ -33,6 +33,7 @@ public class CliInterface {
             System.out.println("========================================");
             System.out.println("1. Iniciar sesión");
             System.out.println("2. Registrar nuevo jugador");
+            System.out.println("3. Registrar nuevo administrador");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
             
@@ -43,6 +44,9 @@ public class CliInterface {
                     break;
                 case "2":
                     showRegisterMenu();
+                    break;
+                case "3":
+                    showRegisterOperatorMenu();
                     break;
                 case "0":
                     exit = true;
@@ -63,8 +67,14 @@ public class CliInterface {
         
         try {
             User user = app.loginUser(nick, password);
-            System.out.println("Bienvenido, " + user.getName() + " (" + user.getNick() + ")");
-            showPlayerMenu();
+            System.out.println("\nBienvenido, " + user.getName() + " (" + user.getNick() + ")");
+            System.out.println("Rol: " + user.getRole().toUpperCase());
+
+            if (user.getRole().equalsIgnoreCase("operator")) {
+                showOperatorMenu();
+            } else {
+                showPlayerMenu();
+            }
         } catch (RuntimeException e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -85,6 +95,70 @@ public class CliInterface {
             System.out.println("Tu número de registro es: " + newUser.getRegistrationNumber());
         } catch (RuntimeException e) {
             System.out.println("Error en el registro: " + e.getMessage());
+        }
+    }
+
+    private void showRegisterOperatorMenu() {
+        System.out.println("\n--- REGISTRO DE NUEVO ADMINISTRADOR ---");
+        System.out.print("Nombre completo: ");
+        String name = scanner.nextLine();
+        System.out.print("Nick deseado: ");
+        String nick = scanner.nextLine();
+        System.out.print("Contraseña (8-12 caracteres): ");
+        String password = scanner.nextLine();
+        
+        try {
+            app.registerOperator(name, nick, password);
+            System.out.println("Registro de administrador completado con éxito.");
+            System.out.println("Ahora puedes iniciar sesión con tus credenciales.");
+        } catch (RuntimeException e) {
+            System.out.println("Error en el registro: " + e.getMessage());
+        }
+    }
+
+    private void showOperatorMenu() {
+        boolean logout = false;
+        while (!logout) {
+            System.out.println("\n--- MENÚ DE ADMINISTRADOR ---");
+            System.out.println("1. Editar personaje de usuario");
+            System.out.println("2. Añadir equipo/esbirros/fortalezas/debilidades");
+            System.out.println("3. Validar desafíos pendientes");
+            System.out.println("4. Bloquear usuario");
+            System.out.println("5. Desbloquear usuario");
+            System.out.println("6. Darse de baja (Eliminar cuenta)");
+            System.out.println("0. Cerrar sesión");
+            System.out.print("Seleccione una opción: ");
+
+            String option = scanner.nextLine();
+            switch (option) {
+                case "1":
+                    System.out.println("Funcionalidad de edición próximamente.");
+                    break;
+                case "2":
+                    System.out.println("Funcionalidad de adición de elementos próximamente.");
+                    break;
+                case "3":
+                    System.out.println("Funcionalidad de validación próximamente.");
+                    break;
+                case "4":
+                    System.out.println("Funcionalidad de bloqueo próximamente.");
+                    break;
+                case "5":
+                    System.out.println("Funcionalidad de desbloqueo próximamente.");
+                    break;
+                case "6":
+                    if (showDeleteAccountMenu()) {
+                        logout = true;
+                    }
+                    break;
+                case "0":
+                    app.logoutUser();
+                    System.out.println("Sesión de administrador cerrada.");
+                    logout = true;
+                    break;
+                default:
+                    System.out.println("Opción no válida.");
+            }
         }
     }
 

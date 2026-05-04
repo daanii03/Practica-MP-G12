@@ -34,7 +34,7 @@ public class DatabaseManager {
                 + "nick TEXT NOT NULL UNIQUE, "
                 + "name TEXT NOT NULL, "
                 + "password TEXT NOT NULL, "
-                + "num_reg TEXT NOT NULL, "
+                + "num_reg TEXT, "
                 + "character_id INTEGER, "
                 + "victories INTEGER DEFAULT 0, "
                 + "role TEXT DEFAULT 'user', "
