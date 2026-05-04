@@ -5,6 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import main.java.urjc.metprog.models.challenges.Challenge;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChallengeDaoImpl implements ChallengeDao {
 
@@ -170,5 +173,57 @@ public class ChallengeDaoImpl implements ChallengeDao {
             System.err.println("Error al obtener el historial de combates: " + e.getMessage());
         }
         return history;
+    }
+    public void savePendingChallenge(Challenge challenge) {
+        String sql = "INSERT INTO desafios_pendientes " +
+                "(challenger_nick, challenged_nick, gold_bet, status, created_at) " +
+                "VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, challenge.getChallenger().getNick());
+            pstmt.setString(2, challenge.getChallenged().getNick());
+            pstmt.setInt(3, challenge.getGoldBet());
+            pstmt.setString(4, challenge.getStatus().name());
+            pstmt.setString(5, challenge.getCreatedAt().toString());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al guardar desafío pendiente: " + e.getMessage());
+        }
+    }
+
+    public void updatePendingChallengeStatus(String challengerNick, String newStatus) {
+        String sql = "UPDATE desafios_pendientes SET status = ? " +
+                "WHERE challenger_nick = ? AND status != 'FINISHED' AND status != 'REJECTED'";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newStatus);
+            pstmt.setString(2, challengerNick);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar estado: " + e.getMessage());
+        }
+    }
+
+    public List<String[]> getPendingChallengesFromDb() {
+        List<String[]> result = new ArrayList<>();
+        String sql = "SELECT challenger_nick, challenged_nick, gold_bet, status, created_at " +
+                "FROM desafios_pendientes " +
+                "WHERE status = 'PENDING_VALIDATION' OR status = 'PUBLISHED'";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                result.add(new String[]{
+                        rs.getString("challenger_nick"),
+                        rs.getString("challenged_nick"),
+                        String.valueOf(rs.getInt("gold_bet")),
+                        rs.getString("status"),
+                        rs.getString("created_at")
+                });
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al cargar desafíos pendientes: " + e.getMessage());
+        }
+        return result;
     }
 }

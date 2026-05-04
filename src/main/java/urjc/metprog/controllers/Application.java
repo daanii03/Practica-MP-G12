@@ -1,6 +1,7 @@
 package main.java.urjc.metprog.controllers;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import main.java.urjc.metprog.dao.ChallengeDaoImpl;
@@ -39,6 +40,41 @@ public class Application {
         this.characterManager = new CharacterManager(new CharacterDaoImpl());
         this.userManager = new UserManager(new UserDaoImpl());
         this.challengeDao = new ChallengeDaoImpl();
+
+        reloadActiveChallengesFromDb();
+    }
+
+    //NO BORRAR LOS SYSTEM.PRINT
+    private void reloadActiveChallengesFromDb() {
+        List<String[]> rows = challengeDao.getPendingChallengesFromDb();
+        System.out.println("DEBUG - Desafíos cargados de BD: " + rows.size());
+        for (String[] row : rows) {
+            System.out.println("DEBUG - Desafío: " + row[0] + " vs " + row[1] + " estado: " + row[3]);
+
+            User challenger = userManager.getUserByNick(row[0]);
+            User challenged = userManager.getUserByNick(row[1]);
+            System.out.println("DEBUG - challenger encontrado: " + (challenger != null));
+            System.out.println("DEBUG - challenged encontrado: " + (challenged != null));
+
+            if (challenger == null || challenged == null) continue;
+
+            Character challengerChar = characterManager.getCharacterByUser(row[0]);
+            Character challengedChar = characterManager.getCharacterByUser(row[1]);
+            System.out.println("DEBUG - challengerChar encontrado: " + (challengerChar != null));
+            System.out.println("DEBUG - challengedChar encontrado: " + (challengedChar != null));
+
+            if (challengerChar == null || challengedChar == null) continue;
+
+            challenger.setCharacter(challengerChar);
+            challenged.setCharacter(challengedChar);
+
+            Challenge challenge = new Challenge(challenger, challenged, Integer.parseInt(row[2]));
+            if (row[3].equals("PUBLISHED")) {
+                challenge.validate(new HashMap<>());
+            }
+            ChallengeManager.getInstance().save(challenge);
+            System.out.println("DEBUG - Desafío añadido al ChallengeManager");
+        }
     }
 
     // ==========================================
@@ -397,9 +433,11 @@ public class Application {
             throw new IllegalStateException("El jugador '" + challengedNick + "' ya tiene un desafío activo.");
         }
 
-        // Crear y registrar el desafío (la propia clase Challenge valida el oro)
+        // Al final de challengePlayer(), antes del return:
         Challenge challenge = new Challenge(currentUser, challenged, goldBet);
-        ChallengeManager.getInstance().save(challenge);
+        challengeDao.savePendingChallenge(challenge);
+        System.out.println("DEBUG - Desafío guardado en BD: " + challenge.getChallenger().getNick()); // <-- añade esto
+        challengeDao.savePendingChallenge(challenge); // <-- AÑADE ESTO
         return challenge;
     }
 
@@ -448,6 +486,8 @@ public class Application {
      */
     public void validateChallenge(Challenge challenge, Map<String, Integer> activeModifiers) {
         userManager.validateChallenge(challenge, activeModifiers);
+        challengeDao.updatePendingChallengeStatus(
+                challenge.getChallenger().getNick(), "PUBLISHED"); // <-- AÑADE
     }
 
     /**
@@ -455,6 +495,8 @@ public class Application {
      */
     public void rejectInvalidChallengeAndBlock(Challenge challenge) {
         userManager.rejectInvalidChallengeAndBlock(challenge);
+        challengeDao.updatePendingChallengeStatus(
+                challenge.getChallenger().getNick(), "REJECTED"); // <-- AÑADE
     }
 
     /**
@@ -496,19 +538,19 @@ public class Application {
                 result.getGoldWon()
         );
 
-        // Actualizar los personajes en la BD (el oro y la vida han cambiado tras el combate)
+        // Actualizar los personajes en la BD
         characterManager.updateCharacter(
                 challenge.getChallenger().getNick(), challenge.getChallenger().getCharacter());
         characterManager.updateCharacter(
                 challenge.getChallenged().getNick(), challenge.getChallenged().getCharacter());
 
+        // Marcar el desafío pendiente como FINISHED en la BD
+        challengeDao.updatePendingChallengeStatus(
+                challenge.getChallenger().getNick(), "FINISHED");
+
         return result;
     }
 
-    /**
-     * El usuario actual rechaza el desafío que tiene pendiente.
-     * Aplica la penalización del 10% del oro apostado (ya gestionada por Challenge.reject()).
-     */
     public void rejectChallenge() {
         Challenge challenge = getPendingChallengeForCurrentUser();
         if (challenge == null) {
@@ -528,6 +570,10 @@ public class Application {
                 challenge.getChallenger().getNick(), challenge.getChallenger().getCharacter());
         characterManager.updateCharacter(
                 challenge.getChallenged().getNick(), challenge.getChallenged().getCharacter());
+
+        // Marcar el desafío pendiente como REJECTED en la BD
+        challengeDao.updatePendingChallengeStatus(
+                challenge.getChallenger().getNick(), "REJECTED");
     }
 
     /**

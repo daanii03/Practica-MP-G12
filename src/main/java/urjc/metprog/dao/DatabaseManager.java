@@ -34,8 +34,6 @@ public class DatabaseManager {
      * Solo crea las tablas si no existen previamente.
      */
     public static void createTables() {
-        // En SQLite, las tablas necesitan al menos una columna.
-        // Empezamos con un ID autoincremental como clave primaria.
 
         String sqlUsuarios = "CREATE TABLE IF NOT EXISTS usuarios ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -62,7 +60,6 @@ public class DatabaseManager {
                 + "skill_attack INTEGER NOT NULL CHECK (skill_attack BETWEEN 1 AND 3), "
                 + "skill_defense INTEGER NOT NULL CHECK (skill_defense BETWEEN 1 AND 3), "
                 + "skill_cost INTEGER DEFAULT 0, "
-                // Atributos exclusivos de cada raza (NULL si no aplica)
                 + "age INTEGER, "
                 + "blood_points INTEGER, "
                 + "rage INTEGER, "
@@ -70,7 +67,6 @@ public class DatabaseManager {
                 + "FOREIGN KEY(user_id) REFERENCES usuarios(id)"
                 + ");";
 
-        // Tabla de equipamiento (armas y armaduras del inventario)
         String sqlEquipment = "CREATE TABLE IF NOT EXISTS equipamiento ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "character_id INTEGER NOT NULL, "
@@ -78,26 +74,23 @@ public class DatabaseManager {
                 + "name TEXT NOT NULL, "
                 + "attack_modifier INTEGER NOT NULL CHECK (attack_modifier BETWEEN 0 AND 3), "
                 + "defense_modifier INTEGER NOT NULL CHECK (defense_modifier BETWEEN 0 AND 3), "
-                + "is_one_hand INTEGER, " // solo aplica a armas (1 = true, 0 = false, NULL = armadura)
-                + "is_active INTEGER DEFAULT 0 CHECK (is_active IN (0, 1)), " // ¿está equipado?
+                + "is_one_hand INTEGER, "
+                + "is_active INTEGER DEFAULT 0 CHECK (is_active IN (0, 1)), "
                 + "FOREIGN KEY(character_id) REFERENCES personajes(id) ON DELETE CASCADE"
                 + ");";
 
-        // Tabla de esbirros
         String sqlMinions = "CREATE TABLE IF NOT EXISTS esbirros ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "character_id INTEGER NOT NULL, "
                 + "type TEXT NOT NULL CHECK(type IN ('human', 'ghoul', 'demon')), "
                 + "name TEXT NOT NULL, "
                 + "health INTEGER NOT NULL CHECK (health BETWEEN 1 AND 3), "
-                // Atributos específicos según tipo (NULL si no aplica)
-                + "loyalty TEXT CHECK(loyalty IN ('ALTA', 'NORMAL', 'BAJA')), " // solo humanos
-                + "dependence INTEGER, " // solo ghouls
-                + "pact_description TEXT, " // solo demonios
+                + "loyalty TEXT CHECK(loyalty IN ('ALTA', 'NORMAL', 'BAJA')), "
+                + "dependence INTEGER, "
+                + "pact_description TEXT, "
                 + "FOREIGN KEY(character_id) REFERENCES personajes(id) ON DELETE CASCADE"
                 + ");";
 
-        // Tabla de modificadores (fortalezas y debilidades)
         String sqlModifiers = "CREATE TABLE IF NOT EXISTS modificadores ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "character_id INTEGER NOT NULL, "
@@ -131,10 +124,20 @@ public class DatabaseManager {
                 + "is_one_hand INTEGER DEFAULT 0"
                 + ");";
 
-        try (Connection conn = getConnection();
-                Statement stmt = conn.createStatement()) {
+        // TABLA NUEVA: desafíos pendientes de validación o respuesta
+        String sqlDesafiosPendientes = "CREATE TABLE IF NOT EXISTS desafios_pendientes ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "challenger_nick TEXT NOT NULL, "
+                + "challenged_nick TEXT NOT NULL, "
+                + "gold_bet INTEGER NOT NULL, "
+                + "status TEXT NOT NULL DEFAULT 'PENDING_VALIDATION', "
+                + "created_at TEXT NOT NULL, "
+                + "modifiers TEXT"
+                + ");";
 
-            // Ejecutar las sentencias de creación
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
             stmt.execute(sqlUsuarios);
             stmt.execute(sqlPersonajes);
             stmt.execute(sqlEquipment);
@@ -142,11 +145,12 @@ public class DatabaseManager {
             stmt.execute(sqlModifiers);
             stmt.execute(sqlDesafios);
             stmt.execute(sqlCatalogo);
+            stmt.execute(sqlDesafiosPendientes); // <-- AÑADIDO
 
             seedCatalog(conn);
 
-            System.out.println(
-                    "Tablas inicializadas correctamente (usuarios, personajes, equipamiento, esbirros, modificadores, desafios, catalogo).");
+            System.out.println("Tablas inicializadas correctamente (usuarios, personajes, " +
+                    "equipamiento, esbirros, modificadores, desafios, catalogo, desafios_pendientes).");
 
         } catch (SQLException e) {
             System.err.println("Error al inicializar la base de datos: " + e.getMessage());
