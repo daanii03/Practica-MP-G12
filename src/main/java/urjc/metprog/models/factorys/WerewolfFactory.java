@@ -4,6 +4,10 @@ import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.characters.CharacterBuilder;
 import main.java.urjc.metprog.models.characters.Inventory;
 import main.java.urjc.metprog.models.characters.Werewolf;
+import main.java.urjc.metprog.models.modifiers.Strength;
+import main.java.urjc.metprog.models.modifiers.StrengthCatalogue;
+import main.java.urjc.metprog.models.modifiers.Weakness;
+import main.java.urjc.metprog.models.modifiers.WeaknessCatalogue;
 import main.java.urjc.metprog.models.skills.Gift;
 import main.java.urjc.metprog.models.skills.GiftCatalogue;
 
@@ -44,11 +48,38 @@ public class WerewolfFactory extends CharacterFactory{
     @Override
     public Character createCharacter(int id, String name) {
 
+        Random random = new Random();
+
         GiftCatalogue[] giftCatalogue = GiftCatalogue.values();
 
-        int randomIndex = new Random().nextInt(giftCatalogue.length);
+
+
+        int randomIndex = random.nextInt(giftCatalogue.length);
 
         Gift gift = giftCatalogue[randomIndex].generateGift();
+
+        Weakness weakness;
+        Strength strength;
+
+        WeaknessCatalogue[] weaknessCatalogue = WeaknessCatalogue.values();
+        StrengthCatalogue[] strengthCatalogue = StrengthCatalogue.values();
+
+
+        randomIndex = random.nextInt(6,weaknessCatalogue.length + 1);
+
+        if (randomIndex == weaknessCatalogue.length + 1)
+            weakness = null;
+        else
+            weakness = weaknessCatalogue[randomIndex].generateWeakness();
+
+        randomIndex = random.nextInt(6,weaknessCatalogue.length +1);
+
+        if (randomIndex == weaknessCatalogue.length)
+            strength = null;
+        else
+            strength = strengthCatalogue[randomIndex].generateStrength();
+
+
 
         CharacterBuilder characterBuilder = new CharacterBuilder();
 
@@ -57,7 +88,9 @@ public class WerewolfFactory extends CharacterFactory{
                 .specialSkill(gift)
                 .life(5)
                 .power(5)
-                .inventory(new Inventory());
+                .inventory(new Inventory())
+                .addWeakness(weakness)
+                .addStrength(strength);
 
         return new Werewolf(characterBuilder);
     }

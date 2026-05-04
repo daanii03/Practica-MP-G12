@@ -4,6 +4,10 @@ import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.characters.CharacterBuilder;
 import main.java.urjc.metprog.models.characters.Hunter;
 import main.java.urjc.metprog.models.characters.Inventory;
+import main.java.urjc.metprog.models.modifiers.Strength;
+import main.java.urjc.metprog.models.modifiers.StrengthCatalogue;
+import main.java.urjc.metprog.models.modifiers.Weakness;
+import main.java.urjc.metprog.models.modifiers.WeaknessCatalogue;
 import main.java.urjc.metprog.models.skills.Talent;
 import main.java.urjc.metprog.models.skills.TalentCatalogue;
 
@@ -44,19 +48,44 @@ public class HunterFactory extends CharacterFactory {
     public Character createCharacter(int id, String name) {
 
         CharacterBuilder characterBuilder = new CharacterBuilder();
-
         TalentCatalogue[] talentCatalogue = TalentCatalogue.values();
 
-        int randomIndex = new Random().nextInt(talentCatalogue.length);
+        Random random = new Random();
+
+        int randomIndex = random.nextInt(talentCatalogue.length);
 
         Talent randomTalent = talentCatalogue[randomIndex].generateTalent();
+
+        Weakness weakness;
+        Strength strength;
+
+        WeaknessCatalogue[] weaknessCatalogue = WeaknessCatalogue.values();
+        StrengthCatalogue[] strengthCatalogue = StrengthCatalogue.values();
+
+
+        randomIndex = random.nextInt(0,4);
+
+        if (randomIndex == 3)
+            weakness = null;
+        else
+            weakness = weaknessCatalogue[randomIndex].generateWeakness();
+
+        randomIndex = random.nextInt(0,4);
+
+        if (randomIndex == 3)
+            strength = null;
+        else
+            strength = strengthCatalogue[randomIndex].generateStrength();
+
 
         characterBuilder.id(id)
                 .name(name)
                 .life(5)
                 .power(5)
                 .specialSkill(randomTalent)
-                .inventory(new Inventory());
+                .inventory(new Inventory())
+                .addWeakness(weakness)
+                .addStrength(strength);
 
         return new Hunter(characterBuilder);
     }

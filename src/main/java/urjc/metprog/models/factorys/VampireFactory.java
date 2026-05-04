@@ -3,6 +3,10 @@ package main.java.urjc.metprog.models.factorys;
 import main.java.urjc.metprog.models.characters.Character;
 import main.java.urjc.metprog.models.characters.CharacterBuilder;
 import main.java.urjc.metprog.models.characters.Inventory;
+import main.java.urjc.metprog.models.modifiers.Strength;
+import main.java.urjc.metprog.models.modifiers.StrengthCatalogue;
+import main.java.urjc.metprog.models.modifiers.Weakness;
+import main.java.urjc.metprog.models.modifiers.WeaknessCatalogue;
 import main.java.urjc.metprog.models.skills.Discipline;
 import main.java.urjc.metprog.models.characters.Vampire;
 import main.java.urjc.metprog.models.skills.DisciplineCatalogue;
@@ -44,15 +48,43 @@ public class VampireFactory extends CharacterFactory {
     public Character createCharacter(int id, String name) {
 
         CharacterBuilder characterBuilder = new CharacterBuilder();
-
         DisciplineCatalogue[] options = DisciplineCatalogue.values();
 
-        int randomIndex = new Random().nextInt(options.length);
+        Random random = new Random();
+
+        int randomIndex = random.nextInt(options.length);
 
         Discipline randomDiscipline = options[randomIndex].generateDiscipline();
 
-        characterBuilder.id(id).name(name).specialSkill(randomDiscipline).life(5)
-                .power(5).inventory(new Inventory());
+        Weakness weakness;
+        Strength strength;
+
+        WeaknessCatalogue[] weaknessCatalogue = WeaknessCatalogue.values();
+        StrengthCatalogue[] strengthCatalogue = StrengthCatalogue.values();
+
+
+        randomIndex = random.nextInt(3,7);
+
+        if (randomIndex == 6)
+            weakness = null;
+        else
+            weakness = weaknessCatalogue[randomIndex].generateWeakness();
+
+        randomIndex = random.nextInt(3,7);
+
+        if (randomIndex == 6)
+            strength = null;
+        else
+            strength = strengthCatalogue[randomIndex].generateStrength();
+
+        characterBuilder.id(id)
+                .name(name)
+                .specialSkill(randomDiscipline)
+                .life(5)
+                .power(5)
+                .inventory(new Inventory())
+                .addWeakness(weakness)
+                .addStrength(strength);
 
 
         return new Vampire(characterBuilder);
