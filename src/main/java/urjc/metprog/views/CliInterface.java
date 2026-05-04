@@ -1,7 +1,9 @@
 package main.java.urjc.metprog.views;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import main.java.urjc.metprog.controllers.Application;
 import main.java.urjc.metprog.models.challenges.Challenge;
@@ -138,7 +140,7 @@ public class CliInterface {
                     showAdminManageEquipmentMenu();
                     break;
                 case "3":
-                    System.out.println("Funcionalidad de validación próximamente.");
+                    showAdminValidateChallengesMenu();
                     break;
                 case "4":
                     System.out.println("Funcionalidad de bloqueo próximamente.");
@@ -945,6 +947,60 @@ public class CliInterface {
             System.out.println("Objeto eliminado con éxito.");
         } catch (Exception e) {
             System.out.println("Error al eliminar objeto: " + e.getMessage());
+        }
+    }
+
+    private void showAdminValidateChallengesMenu() {
+        List<Challenge> pending = app.getPendingChallengesForValidation();
+        if (pending.isEmpty()) {
+            System.out.println("\nNo hay desafíos pendientes de validación.");
+            return;
+        }
+
+        System.out.println("\n--- DESAFÍOS PENDIENTES DE VALIDACIÓN ---");
+        for (int i = 0; i < pending.size(); i++) {
+            Challenge c = pending.get(i);
+            System.out.printf("%d. %s desafía a %s (Oro: %d)%n", 
+                i + 1, c.getChallenger().getNick(), c.getChallenged().getNick(), c.getGoldBet());
+        }
+        System.out.print("Seleccione un desafío (0 para cancelar): ");
+
+        try {
+            int index = Integer.parseInt(scanner.nextLine()) - 1;
+            if (index >= 0 && index < pending.size()) {
+                Challenge selected = pending.get(index);
+                
+                System.out.println("\n1. Validar desafío (Publicar)");
+                System.out.println("2. Rechazar desafío y bloquear usuario (Infractor)");
+                System.out.print("Seleccione opción: ");
+                String opt = scanner.nextLine();
+                
+                if (opt.equals("1")) {
+                    Map<String, Integer> modifiers = new HashMap<>();
+                    boolean adding = true;
+                    while (adding) {
+                        System.out.print("\n¿Añadir modificador de escenario? (S/N): ");
+                        if (scanner.nextLine().equalsIgnoreCase("s")) {
+                            System.out.print("Nombre del modificador (ej. Eclipse, Lluvia): ");
+                            String name = scanner.nextLine();
+                            System.out.print("Valor del modificador (positivo para fortaleza, negativo para debilidad, ej. -1, 2): ");
+                            try {
+                                int val = Integer.parseInt(scanner.nextLine());
+                                modifiers.put(name, val);
+                            } catch (NumberFormatException e) { System.out.println("Valor no válido."); }
+                        } else {
+                            adding = false;
+                        }
+                    }
+                    app.validateChallenge(selected, modifiers);
+                    System.out.println("Desafío validado y publicado con éxito.");
+                } else if (opt.equals("2")) {
+                    app.rejectInvalidChallengeAndBlock(selected);
+                    System.out.println("Desafío rechazado y usuario bloqueado.");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 }

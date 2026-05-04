@@ -222,22 +222,6 @@ public class CharacterManager {
     }
 
     /**
-     * Añade una armadura al inventario del personaje de un usuario.
-     *
-     * @param ownerNick Nick del usuario dueño del personaje.
-     * @param armor     La armadura a añadir.
-     */
-    public void addArmorToInventory(String ownerNick, Armor armor) {
-        Character character = getCharacterByUser(ownerNick);
-        if (character != null) {
-            character.getInventory().addArmor(armor);
-            updateCharacter(ownerNick, character);
-        } else {
-            throw new IllegalArgumentException("El usuario especificado no tiene personaje.");
-        }
-    }
-
-    /**
      * Elimina un arma del inventario.
      */
     public void removeWeaponFromInventory(String ownerNick, Weapon weapon) {

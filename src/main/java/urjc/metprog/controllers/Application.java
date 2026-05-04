@@ -437,6 +437,13 @@ public class Application {
     }
 
     /**
+     * (Acción de operador) Rechaza un desafío que rompe las reglas y bloquea al usuario desafiante.
+     */
+    public void rejectInvalidChallengeAndBlock(Challenge challenge) {
+        userManager.rejectInvalidChallengeAndBlock(challenge);
+    }
+
+    /**
      * El usuario actual acepta el desafío que tiene pendiente.
      * Ejecuta el combate de forma automática y persiste el resultado.
      *
