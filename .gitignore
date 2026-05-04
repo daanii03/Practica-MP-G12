@@ -42,3 +42,6 @@ out/
 *.db
 *.sqlite
 *.sqlite3
+
+# Documentation
+doc_metodos.md
