@@ -6,6 +6,8 @@ import main.java.urjc.metprog.dao.CharacterDaoImpl;
 import main.java.urjc.metprog.dao.UserDaoImpl;
 import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.characters.Character;
+import main.java.urjc.metprog.models.equipment.Armor;
+import main.java.urjc.metprog.models.equipment.Weapon;
 
 /**
  * Controlador principal de la aplicación.
@@ -126,6 +128,112 @@ public class Application {
     }
 
     // ==========================================
+    // MÉTODOS DE GESTIÓN DE EQUIPAMIENTO
+    // ==========================================
+
+    /**
+     * Comprueba que el usuario tiene sesión y personaje, y devuelve el personaje.
+     * Método auxiliar privado para evitar duplicar esta validación en cada método de equipamiento.
+     *
+     * @return El personaje del usuario actual.
+     * @throws IllegalStateException Si no hay sesión iniciada o el usuario no tiene personaje.
+     */
+    private Character requireCurrentCharacter() {
+        if (currentUser == null) {
+            throw new IllegalStateException("Debes iniciar sesión para gestionar el equipamiento.");
+        }
+        Character character = characterManager.getCharacterByUser(currentUser.getNick());
+        if (character == null) {
+            throw new IllegalStateException("No tienes un personaje creado. Crea uno primero.");
+        }
+        return character;
+    }
+
+    /**
+     * Obtiene todas las armas que el personaje posee en su inventario.
+     * Útil para mostrar al usuario la lista de armas disponibles antes de elegir.
+     *
+     * @return Lista de armas en el inventario del personaje.
+     */
+    public List<Weapon> getAvailableWeapons() {
+        Character character = requireCurrentCharacter();
+        return character.getInventory().getWeapons();
+    }
+
+    /**
+     * Obtiene todas las armaduras que el personaje posee en su inventario.
+     * Útil para mostrar al usuario la lista de armaduras disponibles antes de elegir.
+     *
+     * @return Lista de armaduras en el inventario del personaje.
+     */
+    public List<Armor> getAvailableArmors() {
+        Character character = requireCurrentCharacter();
+        return character.getInventory().getArmors();
+    }
+
+    /**
+     * Obtiene las armas actualmente equipadas por el personaje.
+     *
+     * @return Lista de armas activas (puede estar vacía).
+     */
+    public List<Weapon> getActiveWeapons() {
+        Character character = requireCurrentCharacter();
+        return character.getInventory().getActiveWeapons();
+    }
+
+    /**
+     * Obtiene la armadura actualmente equipada por el personaje.
+     *
+     * @return La armadura activa, o null si no tiene ninguna equipada.
+     */
+    public Armor getActiveArmor() {
+        Character character = requireCurrentCharacter();
+        return character.getInventory().getActiveArmor();
+    }
+
+    /**
+     * Cambia las armas activas del personaje.
+     * Las reglas de validación (máximo 2 armas, restricción de dos manos, pertenencia al inventario)
+     * son aplicadas por la clase Inventory.
+     *
+     * @param weapons Lista de armas a equipar.
+     * @throws IllegalStateException    Si no hay sesión o personaje.
+     * @throws IllegalArgumentException Si se incumple alguna regla de equipamiento.
+     */
+    public void changeActiveWeapons(List<Weapon> weapons) {
+        requireCurrentCharacter();
+        characterManager.changeActiveEquipment(currentUser.getNick(), weapons, null);
+    }
+
+    /**
+     * Cambia la armadura activa del personaje.
+     * La validación de pertenencia al inventario es aplicada por la clase Inventory.
+     *
+     * @param armor La armadura a equipar.
+     * @throws IllegalStateException    Si no hay sesión o personaje.
+     * @throws IllegalArgumentException Si la armadura no pertenece al inventario.
+     */
+    public void changeActiveArmor(Armor armor) {
+        requireCurrentCharacter();
+        characterManager.changeActiveEquipment(currentUser.getNick(), null, armor);
+    }
+
+    /**
+     * Cambia armas y armadura activas en una sola operación.
+     * Permite a la interfaz ofrecer un flujo combinado donde el usuario elige todo de una vez.
+     * Se puede pasar null en cualquiera de los dos parámetros para cambiar solo uno.
+     *
+     * @param weapons Lista de armas a equipar (null para no cambiar).
+     * @param armor   Armadura a equipar (null para no cambiar).
+     * @throws IllegalStateException    Si no hay sesión o personaje.
+     * @throws IllegalArgumentException Si se incumple alguna regla de equipamiento.
+     */
+    public void changeActiveEquipment(List<Weapon> weapons, Armor armor) {
+        requireCurrentCharacter();
+        characterManager.changeActiveEquipment(currentUser.getNick(), weapons, armor);
+    }
+
+    // ==========================================
     // OTROS MÉTODOS GENERALES
     // ==========================================
     
@@ -139,7 +247,6 @@ public class Application {
     // Placeholders para futuras funcionalidades
     public void chooseSkill(String skillName) {}
     public void selectMinions(List<String> minionNames) {}
-    public void addEquipment(String equipmentName) {}
     public void challengePlayer(String opponentNick, int goldBet) {}
     public void acceptChallenge(String challengeId) {}
     public void rejectChallenge(String challengeId) {}
