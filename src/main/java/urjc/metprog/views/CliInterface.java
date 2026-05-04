@@ -143,10 +143,22 @@ public class CliInterface {
                     showAdminValidateChallengesMenu();
                     break;
                 case "4":
-                    System.out.println("Funcionalidad de bloqueo próximamente.");
+                    System.out.print("Introduce el nick del usuario a BLOQUEAR: ");
+                    String blockNick = scanner.nextLine();
+                    try {
+                        app.blockUser(blockNick);
+                    } catch (RuntimeException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
                     break;
                 case "5":
-                    System.out.println("Funcionalidad de desbloqueo próximamente.");
+                    System.out.print("Introduce el nick del usuario a DESBLOQUEAR: ");
+                    String unblockNick = scanner.nextLine();
+                    try {
+                        app.unblockUser(unblockNick);
+                    } catch (RuntimeException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    }
                     break;
                 case "6":
                     if (showDeleteAccountMenu()) {

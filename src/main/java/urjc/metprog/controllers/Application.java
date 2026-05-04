@@ -91,6 +91,20 @@ public class Application {
         }
     }
 
+    /**
+     * Bloquea a un usuario (acción de administrador).
+     */
+    public void blockUser(String nick) {
+        userManager.blockUser(nick);
+    }
+
+    /**
+     * Desbloquea a un usuario (acción de administrador).
+     */
+    public void unblockUser(String nick) {
+        userManager.unblockUser(nick);
+    }
+
     public User getCurrentUser() {
         return currentUser;
     }
