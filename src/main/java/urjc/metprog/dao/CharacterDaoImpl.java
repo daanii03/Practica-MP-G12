@@ -476,93 +476,114 @@ public class CharacterDaoImpl implements CharacterDao {
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    int id = rs.getInt("id");
-                    String name = rs.getString("name");
-                    String race = rs.getString("race");
-                    int life = rs.getInt("life");
-                    int power = rs.getInt("power");
-                    int gold = rs.getInt("gold");
-                    
-                    // Leer datos de la habilidad especial
-                    String skillType = rs.getString("special_skill");
-                    String skillName = rs.getString("skill_name");
-                    int skillAtk = rs.getInt("skill_attack");
-                    int skillDef = rs.getInt("skill_defense");
-                    int skillCost = rs.getInt("skill_cost");
-                    
-                    // Construir la habilidad real
-                    SpecialSkill skill;
-                    switch (skillType) {
-                        case "gift":
-                            skill = new Gift(skillName, skillCost, skillAtk, skillDef);
-                            break;
-                        case "talent":
-                            skill = new Talent(skillName, skillAtk, skillDef);
-                            break;
-                        default: // discipline
-                            skill = new Discipline(skillName, skillCost, skillAtk, skillDef);
-                            break;
-                    }
-                    
-                    // Cargar inventario desde la tabla equipamiento
-                    Inventory inventory = loadEquipment(id);
-                    inventory.setGold(gold);
-                    
-                    // Construir el personaje con el builder
-                    CharacterBuilder builder = new CharacterBuilder()
-                            .id(id)
-                            .name(name)
-                            .life(life)
-                            .power(power)
-                            .specialSkill(skill)
-                            .inventory(inventory);
-                    
-                    // Cargar esbirros desde su tabla
-                    List<Minion> minions = loadMinions(id);
-                    for (Minion m : minions) {
-                        builder.addMinion(m);
-                    }
-                    
-                    // Cargar modificadores (fortalezas y debilidades) desde su tabla
-                    loadModifiers(id, builder);
-                    
-                    // Instanciar la subclase correcta y aplicar atributos de raza
-                    if ("werewolf".equalsIgnoreCase(race)) {
-                        Werewolf werewolf = new Werewolf(builder);
-                        int rage = rs.getInt("rage");
-                        if (!rs.wasNull()) {
-                            // Usamos reflexión o setter si está expuesto;
-                            // Werewolf inicia con rage=0 por defecto, así que 
-                            // incrementamos manualmente hasta el valor almacenado
-                            for (int i = 0; i < rage; i++) {
-                                werewolf.increaseRage();
-                            }
-                        }
-                        return werewolf;
-                    } else if ("hunter".equalsIgnoreCase(race)) {
-                        Hunter hunter = new Hunter(builder);
-                        int will = rs.getInt("will");
-                        if (!rs.wasNull()) {
-                            hunter.setWill(will);
-                        }
-                        return hunter;
-                    } else {
-                        Vampire vampire = new Vampire(builder);
-                        int age = rs.getInt("age");
-                        if (!rs.wasNull()) {
-                            vampire.setAge(age);
-                        }
-                        int bloodPoints = rs.getInt("blood_points");
-                        if (!rs.wasNull()) {
-                            vampire.setBloodPoints(bloodPoints);
-                        }
-                        return vampire;
-                    }
+                    return mapResultSetToCharacter(rs);
                 }
             }
         } catch (SQLException e) {
             System.err.println("Error al recuperar personaje: " + e.getMessage());
         }
         return null;
+    }
+
+    private Character mapResultSetToCharacter(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String name = rs.getString("name");
+        String race = rs.getString("race");
+        int life = rs.getInt("life");
+        int power = rs.getInt("power");
+        int gold = rs.getInt("gold");
+
+        // Leer datos de la habilidad especial
+        String skillType = rs.getString("special_skill");
+        String skillName = rs.getString("skill_name");
+        int skillAtk = rs.getInt("skill_attack");
+        int skillDef = rs.getInt("skill_defense");
+        int skillCost = rs.getInt("skill_cost");
+
+        // Construir la habilidad real
+        SpecialSkill skill;
+        switch (skillType) {
+            case "gift":
+                skill = new Gift(skillName, skillCost, skillAtk, skillDef);
+                break;
+            case "talent":
+                skill = new Talent(skillName, skillAtk, skillDef);
+                break;
+            default: // discipline
+                skill = new Discipline(skillName, skillCost, skillAtk, skillDef);
+                break;
+        }
+
+        // Cargar inventario desde la tabla equipamiento
+        Inventory inventory = loadEquipment(id);
+        inventory.setGold(gold);
+
+        // Construir el personaje con el builder
+        CharacterBuilder builder = new CharacterBuilder()
+                .id(id)
+                .name(name)
+                .life(life)
+                .power(power)
+                .specialSkill(skill)
+                .inventory(inventory);
+
+        // Cargar esbirros desde su tabla
+        List<Minion> minions = loadMinions(id);
+        for (Minion m : minions) {
+            builder.addMinion(m);
+        }
+
+        // Cargar modificadores (fortalezas y debilidades) desde su tabla
+        loadModifiers(id, builder);
+
+        // Instanciar la subclase correcta y aplicar atributos de raza
+        if ("werewolf".equalsIgnoreCase(race)) {
+            Werewolf werewolf = new Werewolf(builder);
+            int rage = rs.getInt("rage");
+            if (!rs.wasNull()) {
+                for (int i = 0; i < rage; i++) {
+                    werewolf.increaseRage();
+                }
+            }
+            return werewolf;
+        } else if ("hunter".equalsIgnoreCase(race)) {
+            Hunter hunter = new Hunter(builder);
+            int will = rs.getInt("will");
+            if (!rs.wasNull()) {
+                hunter.setWill(will);
+            }
+            return hunter;
+        } else {
+            Vampire vampire = new Vampire(builder);
+            int age = rs.getInt("age");
+            if (!rs.wasNull()) {
+                vampire.setAge(age);
+            }
+            int bloodPoints = rs.getInt("blood_points");
+            if (!rs.wasNull()) {
+                vampire.setBloodPoints(bloodPoints);
+            }
+            return vampire;
+        }
+    }
+
+    @Override
+    public java.util.Map<String, Character> getAllCharactersWithOwners() {
+        java.util.Map<String, Character> result = new java.util.HashMap<>();
+        String sql = "SELECT p.*, u.nick FROM personajes p JOIN usuarios u ON p.user_id = u.id";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String ownerNick = rs.getString("nick");
+                Character character = mapResultSetToCharacter(rs);
+                result.put(ownerNick, character);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al recuperar todos los personajes: " + e.getMessage());
+        }
+        return result;
     }
 }

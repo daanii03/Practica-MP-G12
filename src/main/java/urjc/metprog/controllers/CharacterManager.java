@@ -204,4 +204,13 @@ public class CharacterManager {
             throw new IllegalArgumentException("El usuario especificado no tiene personaje.");
         }
     }
+
+    /**
+     * Obtiene todos los personajes registrados junto con sus dueños.
+     *
+     * @return Mapa de ownerNick -> Character.
+     */
+    public java.util.Map<String, Character> getAllCharacters() {
+        return characterDao.getAllCharactersWithOwners();
+    }
 }

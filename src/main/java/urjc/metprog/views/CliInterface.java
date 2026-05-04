@@ -132,7 +132,7 @@ public class CliInterface {
             String option = scanner.nextLine();
             switch (option) {
                 case "1":
-                    System.out.println("Funcionalidad de edición próximamente.");
+                    showAdminEditCharacterMenu();
                     break;
                 case "2":
                     System.out.println("Funcionalidad de adición de elementos próximamente.");
@@ -729,6 +729,123 @@ public class CliInterface {
 
         } catch (IllegalStateException e) {
             System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    // ==========================================
+    // MÉTODOS DE ADMINISTRACIÓN (OPERADOR)
+    // ==========================================
+
+    private void showAdminEditCharacterMenu() {
+        java.util.Map<String, Character> characters = app.getAllCharacters();
+        if (characters.isEmpty()) {
+            System.out.println("\nNo hay personajes registrados en el sistema.");
+            return;
+        }
+
+        System.out.println("\n--- LISTA DE PERSONAJES ---");
+        List<String> owners = new ArrayList<>(characters.keySet());
+        for (int i = 0; i < owners.size(); i++) {
+            String owner = owners.get(i);
+            Character c = characters.get(owner);
+            System.out.println((i + 1) + ". " + c.getName() + " (Dueño: " + owner + ", Raza: " + c.getClass().getSimpleName() + ")");
+        }
+        System.out.println("0. Cancelar");
+        System.out.print("Seleccione el personaje a editar: ");
+
+        String choice = scanner.nextLine();
+        try {
+            int index = Integer.parseInt(choice) - 1;
+            if (index >= 0 && index < owners.size()) {
+                String selectedOwner = owners.get(index);
+                Character selectedChar = characters.get(selectedOwner);
+                showEditCharacterFields(selectedOwner, selectedChar);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Opción no válida.");
+        }
+    }
+
+    private void showEditCharacterFields(String ownerNick, Character character) {
+        boolean back = false;
+        while (!back) {
+            System.out.println("\n--- EDITANDO PERSONAJE: " + character.getName() + " ---");
+            System.out.println("1. Editar Nombre (Actual: " + character.getName() + ")");
+            System.out.println("2. Editar Oro (Actual: " + character.checkGold() + ")");
+            System.out.println("3. Editar Vida (Actual: " + character.getLife() + ")");
+            System.out.println("4. Editar Poder (Actual: " + character.getPower() + ")");
+            
+            // Atributos de raza
+            if (character instanceof main.java.urjc.metprog.models.characters.Vampire) {
+                main.java.urjc.metprog.models.characters.Vampire v = (main.java.urjc.metprog.models.characters.Vampire) character;
+                System.out.println("5. Editar Edad (Actual: " + v.getAge() + ")");
+                System.out.println("6. Editar Puntos de Sangre (Actual: " + v.getBloodPoints() + ")");
+            } else if (character instanceof main.java.urjc.metprog.models.characters.Werewolf) {
+                main.java.urjc.metprog.models.characters.Werewolf w = (main.java.urjc.metprog.models.characters.Werewolf) character;
+                System.out.println("5. Editar Rabia (Actual: " + w.getRage() + ")");
+            } else if (character instanceof main.java.urjc.metprog.models.characters.Hunter) {
+                main.java.urjc.metprog.models.characters.Hunter h = (main.java.urjc.metprog.models.characters.Hunter) character;
+                System.out.println("5. Editar Voluntad (Actual: " + h.getWill() + ")");
+            }
+
+            System.out.println("0. Finalizar edición y guardar");
+            System.out.print("Seleccione qué desea editar: ");
+
+            String option = scanner.nextLine();
+            switch (option) {
+                case "1":
+                    System.out.print("Nuevo nombre: ");
+                    character.setName(scanner.nextLine());
+                    break;
+                case "2":
+                    System.out.print("Nuevo oro: ");
+                    try {
+                        character.getInventory().setGold(Integer.parseInt(scanner.nextLine()));
+                    } catch (NumberFormatException e) { System.out.println("Valor no válido."); }
+                    break;
+                case "3":
+                    System.out.print("Nueva vida (0-5): ");
+                    try {
+                        character.setLife(Integer.parseInt(scanner.nextLine()));
+                    } catch (NumberFormatException e) { System.out.println("Valor no válido."); }
+                    break;
+                case "4":
+                    System.out.print("Nuevo poder (1-5): ");
+                    try {
+                        character.setPower(Integer.parseInt(scanner.nextLine()));
+                    } catch (NumberFormatException e) { System.out.println("Valor no válido."); }
+                    break;
+                case "5":
+                    try {
+                        if (character instanceof main.java.urjc.metprog.models.characters.Vampire) {
+                            System.out.print("Nueva edad: ");
+                            ((main.java.urjc.metprog.models.characters.Vampire) character).setAge(Integer.parseInt(scanner.nextLine()));
+                        } else if (character instanceof main.java.urjc.metprog.models.characters.Werewolf) {
+                            System.out.print("Nueva rabia: ");
+                            int targetRage = Integer.parseInt(scanner.nextLine());
+                            System.out.println("Nota: La rabia solo puede aumentar en este modelo.");
+                        } else if (character instanceof main.java.urjc.metprog.models.characters.Hunter) {
+                            System.out.print("Nueva voluntad: ");
+                            ((main.java.urjc.metprog.models.characters.Hunter) character).setWill(Integer.parseInt(scanner.nextLine()));
+                        }
+                    } catch (NumberFormatException e) { System.out.println("Valor no válido."); }
+                    break;
+                case "6":
+                    if (character instanceof main.java.urjc.metprog.models.characters.Vampire) {
+                        System.out.print("Nuevos puntos de sangre: ");
+                        try {
+                            ((main.java.urjc.metprog.models.characters.Vampire) character).setBloodPoints(Integer.parseInt(scanner.nextLine()));
+                        } catch (NumberFormatException e) { System.out.println("Valor no válido."); }
+                    }
+                    break;
+                case "0":
+                    app.updateCharacter(ownerNick, character);
+                    System.out.println("Personaje actualizado correctamente.");
+                    back = true;
+                    break;
+                default:
+                    System.out.println("Opción no válida.");
+            }
         }
     }
 }

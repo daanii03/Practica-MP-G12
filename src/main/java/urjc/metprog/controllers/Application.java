@@ -246,8 +246,31 @@ public class Application {
     }
 
     // ==========================================
+    // MÉTODOS DE ADMINISTRACIÓN (OPERADOR)
+    // ==========================================
+
+    /**
+     * Obtiene todos los personajes de la base de datos con sus dueños.
+     * Solo accesible por operadores (aunque el control de rol debe estar en la vista).
+     */
+    public java.util.Map<String, Character> getAllCharacters() {
+        return characterManager.getAllCharacters();
+    }
+
+    /**
+     * Actualiza los datos de un personaje en la base de datos.
+     * 
+     * @param ownerNick Nick del dueño del personaje.
+     * @param character Objeto character con los nuevos datos.
+     */
+    public void updateCharacter(String ownerNick, Character character) {
+        characterManager.updateCharacter(ownerNick, character);
+    }
+
+    // ==========================================
     // OTROS MÉTODOS GENERALES
     // ==========================================
+
     
     /**
      * Obtiene el ranking global de victorias.

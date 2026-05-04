@@ -10,4 +10,10 @@ public interface CharacterDao {
     void deleteCharacter(int id);
 
     Character getCharacterByOwner(String ownerNick);
+
+    /**
+     * Obtiene todos los personajes de la base de datos junto con el nick de su dueño.
+     * @return Mapa de ownerNick -> Character.
+     */
+    java.util.Map<String, Character> getAllCharactersWithOwners();
 }
