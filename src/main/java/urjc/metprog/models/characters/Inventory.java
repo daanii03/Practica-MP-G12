@@ -29,25 +29,8 @@ public class Inventory {
     private List<Armor> armors = new ArrayList<>();
 
 
-    public Inventory(){
-        ArmorCatalogue[] armorCatalogue = ArmorCatalogue.values();
-        WeaponCatalogue[] weaponCatalogue = WeaponCatalogue.values();
+    public Inventory() {
 
-        int randomIndex1 = new Random().nextInt(armorCatalogue.length);
-        int randomIndex2 = 0;
-        while (randomIndex2 == randomIndex1)
-            randomIndex2 = new Random().nextInt(armorCatalogue.length);
-
-        this.armors.add(armorCatalogue[randomIndex1].generateArmor());
-        this.armors.add(armorCatalogue[randomIndex2].generateArmor());
-
-        randomIndex1 = new Random().nextInt(weaponCatalogue.length);
-        while (randomIndex2 == randomIndex1){
-            randomIndex2 = new Random().nextInt(weaponCatalogue.length);
-        }
-
-        this.weapons.add(weaponCatalogue[randomIndex1].generateWeapon());
-        this.weapons.add(weaponCatalogue[randomIndex2].generateWeapon());
     }
 
     /**

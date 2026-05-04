@@ -10,7 +10,10 @@ import main.java.urjc.metprog.models.factorys.WerewolfFactory;
 import main.java.urjc.metprog.models.minions.Minion;
 import main.java.urjc.metprog.models.modifiers.Strength;
 import main.java.urjc.metprog.models.modifiers.Weakness;
+import main.java.urjc.metprog.models.equipment.ArmorCatalogue;
+import main.java.urjc.metprog.models.equipment.WeaponCatalogue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -42,6 +45,9 @@ public class CharacterManager {
      * @return El personaje recién creado.
      * @throws IllegalArgumentException si la raza no es válida.
      */
+    /**
+     * Crea un personaje delegando en la fábrica correspondiente y lo guarda en la BD.
+     */
     public Character createCharacter(String ownerNick, String name, String race) {
         Character newCharacter = null;
         int generatedId = Math.abs(new Random().nextInt());
@@ -60,8 +66,43 @@ public class CharacterManager {
                 throw new IllegalArgumentException("Raza de personaje no reconocida: " + race);
         }
 
+        // --- SOLUCIÓN: AÑADIR EQUIPO INICIAL ALEATORIO AQUÍ ---
+        addInitialEquipment(newCharacter);
+        // ------------------------------------------------------
+
         characterDao.insertCharacter(newCharacter, ownerNick);
         return newCharacter;
+    }
+
+    /**
+     * Método auxiliar para dar 2 armas y 2 armaduras aleatorias al crear el personaje.
+     */
+    private void addInitialEquipment(Character character) {
+        Random rand = new Random();
+        ArmorCatalogue[] armorValues = ArmorCatalogue.values();
+        WeaponCatalogue[] weaponValues = WeaponCatalogue.values();
+
+        // --- PARA LAS ARMADURAS ---
+        List<Integer> usedArmorIdx = new ArrayList<>();
+        while (usedArmorIdx.size() < 3) {
+            int idx = rand.nextInt(armorValues.length);
+            if (!usedArmorIdx.contains(idx)) {
+                character.getInventory().addArmor(armorValues[idx].generateArmor());
+                usedArmorIdx.add(idx);
+            }
+            // Si tu catálogo tiene menos de 3 armaduras, este bucle sería infinito.
+            // Asegúrate de tener al menos 3 en el Enum.
+        }
+
+        // --- PARA LAS ARMAS ---
+        List<Integer> usedWeaponIdx = new ArrayList<>();
+        while (usedWeaponIdx.size() < 3) {
+            int idx = rand.nextInt(weaponValues.length);
+            if (!usedWeaponIdx.contains(idx)) {
+                character.getInventory().addWeapon(weaponValues[idx].generateWeapon());
+                usedWeaponIdx.add(idx);
+            }
+        }
     }
 
     /**
