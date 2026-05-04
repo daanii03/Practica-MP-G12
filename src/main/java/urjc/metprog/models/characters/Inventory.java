@@ -1,10 +1,13 @@
 package main.java.urjc.metprog.models.characters;
 
 import main.java.urjc.metprog.models.equipment.Armor;
+import main.java.urjc.metprog.models.equipment.ArmorCatalogue;
 import main.java.urjc.metprog.models.equipment.Weapon;
+import main.java.urjc.metprog.models.equipment.WeaponCatalogue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Gestiona el equipamiento y recursos económicos de un personaje.
@@ -19,11 +22,33 @@ import java.util.List;
  */
 
 public class Inventory {
-    private int gold;
+    private int gold = 100;
     private Armor activeArmor;
     private List<Weapon> activeWeapons = new ArrayList<>();
     private List<Weapon> weapons = new ArrayList<>();
     private List<Armor> armors = new ArrayList<>();
+
+
+    public Inventory(){
+        ArmorCatalogue[] armorCatalogue = ArmorCatalogue.values();
+        WeaponCatalogue[] weaponCatalogue = WeaponCatalogue.values();
+
+        int randomIndex1 = new Random().nextInt(armorCatalogue.length);
+        int randomIndex2 = 0;
+        while (randomIndex2 == randomIndex1)
+            randomIndex2 = new Random().nextInt(armorCatalogue.length);
+
+        this.armors.add(armorCatalogue[randomIndex1].generateArmor());
+        this.armors.add(armorCatalogue[randomIndex2].generateArmor());
+
+        randomIndex1 = new Random().nextInt(weaponCatalogue.length);
+        while (randomIndex2 == randomIndex1){
+            randomIndex2 = new Random().nextInt(weaponCatalogue.length);
+        }
+
+        this.weapons.add(weaponCatalogue[randomIndex1].generateWeapon());
+        this.weapons.add(weaponCatalogue[randomIndex2].generateWeapon());
+    }
 
     /**
      * Valida que la cantidad de oro no sea negativa.
