@@ -3,7 +3,10 @@ package main.java.urjc.metprog.controllers;
 import main.java.urjc.metprog.dao.UserDao;
 import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.user.UserBuilder;
+import main.java.urjc.metprog.models.challenges.Challenge; // Añadido para el operador
+
 import java.util.Random;
+import java.util.Map;
 
 /**
  * Gestor de usuarios. Controla el registro, login, bajas y bloqueos de
@@ -101,13 +104,12 @@ public class UserManager {
         }
     }
 
-    // ==========================================
-    // FUNCIONES EXCLUSIVAS DEL OPERADOR
-    // ==========================================
+
+    //Funciones exclusivas del operador
 
     /**
      * Bloquea a un usuario infractor.
-     * 
+     *
      * @param nick Nick del usuario a bloquear.
      */
     public void blockUser(String nick) {
@@ -123,7 +125,7 @@ public class UserManager {
 
     /**
      * Desbloquea a un usuario.
-     * 
+     *
      * @param nick Nick del usuario a desbloquear.
      */
     public void unblockUser(String nick) {
@@ -138,27 +140,46 @@ public class UserManager {
     }
 
     /**
+     * Valida un desafío pendiente decidiendo qué modificadores estarán presentes.
+     *
+     * @param challenge       El desafío que el operador está revisando.
+     * @param activeModifiers Un mapa con las fortalezas y debilidades que el operador decide activar.
+     */
+    public void validateChallenge(Challenge challenge, Map<String, Integer> activeModifiers) {
+        challenge.validate(activeModifiers);
+    }
+
+    /**
+     * Rechaza un desafío que incumple las normas (ej. desafiar a alguien que perdió en las últimas 24h)
+     * y bloquea al usuario infractor automáticamente.
+     *
+     * @param invalidChallenge El desafío que rompe las reglas.
+     */
+    public void rejectInvalidChallengeAndBlock(Challenge invalidChallenge) {
+        String challengerNick = invalidChallenge.getChallenger().getNick();
+        blockUser(challengerNick);
+        ChallengeManager.getInstance().delete(invalidChallenge);
+    }
+
+
+    /**
      * Genera un número de registro único (Formato LNNLL) comprobando
      * que no exista previamente en la base de datos.
      */
-
     private String createRecordNumber() {
         String newNumber;
         do {
             newNumber = createRandomFormat();
-
         } while (userDao.getUserByRegistrationNumber(newNumber) != null);
-
 
         return newNumber;
     }
 
+    //Funciones para generar codigo LNNLL
     /**
-     * Función auxiliar que crea el string con el formato
-     * Letra-Número-Número-Letra-Letra.
+     * Función auxiliar que crea el string con el formato LNNLL
      */
     private String createRandomFormat() {
-
         Random rand = new Random();
         char l1 = (char) ('A' + rand.nextInt(26));
         int n1 = rand.nextInt(10);
@@ -167,7 +188,6 @@ public class UserManager {
         char l3 = (char) ('A' + rand.nextInt(26));
 
         return "" + l1 + n1 + n2 + l2 + l3;
-
     }
 
     /**
