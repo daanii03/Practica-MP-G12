@@ -66,23 +66,21 @@ public class CharacterManager {
                 throw new IllegalArgumentException("Raza de personaje no reconocida: " + race);
         }
 
-        // --- SOLUCIÓN: AÑADIR EQUIPO INICIAL ALEATORIO AQUÍ ---
         addInitialEquipment(newCharacter);
-        // ------------------------------------------------------
 
         characterDao.insertCharacter(newCharacter, ownerNick);
         return newCharacter;
     }
 
     /**
-     * Método auxiliar para dar 2 armas y 2 armaduras aleatorias al crear el personaje.
+     * Método auxiliar para dar 3 armas y 3 armaduras aleatorias al crear el personaje.
      */
     private void addInitialEquipment(Character character) {
         Random rand = new Random();
         ArmorCatalogue[] armorValues = ArmorCatalogue.values();
         WeaponCatalogue[] weaponValues = WeaponCatalogue.values();
 
-        // --- PARA LAS ARMADURAS ---
+        // Armaduras
         List<Integer> usedArmorIdx = new ArrayList<>();
         while (usedArmorIdx.size() < 3) {
             int idx = rand.nextInt(armorValues.length);
@@ -90,11 +88,10 @@ public class CharacterManager {
                 character.getInventory().addArmor(armorValues[idx].generateArmor());
                 usedArmorIdx.add(idx);
             }
-            // Si tu catálogo tiene menos de 3 armaduras, este bucle sería infinito.
-            // Asegúrate de tener al menos 3 en el Enum.
+
         }
 
-        // --- PARA LAS ARMAS ---
+        // Armas
         List<Integer> usedWeaponIdx = new ArrayList<>();
         while (usedWeaponIdx.size() < 3) {
             int idx = rand.nextInt(weaponValues.length);
@@ -161,7 +158,7 @@ public class CharacterManager {
             throw new IllegalArgumentException("El personaje a actualizar no puede ser nulo.");
         }
 
-        // Borrado e inserción como solución a la falta de un método UPDATE en el DAO
+
         characterDao.deleteCharacter(updatedCharacter.getId());
         characterDao.insertCharacter(updatedCharacter, ownerNick);
     }

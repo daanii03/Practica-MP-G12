@@ -3,7 +3,7 @@ package main.java.urjc.metprog.controllers;
 import main.java.urjc.metprog.dao.UserDao;
 import main.java.urjc.metprog.models.user.User;
 import main.java.urjc.metprog.models.user.UserBuilder;
-import main.java.urjc.metprog.models.challenges.Challenge; // Añadido para el operador
+import main.java.urjc.metprog.models.challenges.Challenge;
 
 import java.util.Random;
 import java.util.Map;
@@ -116,7 +116,7 @@ public class UserManager {
         User user = userDao.getUser(nick);
         if (user != null) {
             user.setBlocked(true);
-            userDao.updateUser(user); // Asumimos que el DAO tiene un método UPDATE
+            userDao.updateUser(user);
             System.out.println("Usuario " + nick + " bloqueado correctamente.");
         } else {
             throw new RuntimeException("No se encontró al usuario con nick: " + nick);
