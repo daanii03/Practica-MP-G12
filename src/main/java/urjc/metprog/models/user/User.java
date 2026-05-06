@@ -25,6 +25,9 @@ public class User {
         this.isBlocked = userBuilder.isBlocked();
     }
 
+    public User() {
+    }
+
     //
     public String getName() { return name; }
     public String getNick() { return nick; }

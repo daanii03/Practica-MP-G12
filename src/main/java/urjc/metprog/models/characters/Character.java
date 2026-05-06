@@ -52,6 +52,9 @@ public abstract class Character {
         this.minions.addAll(characterBuilder.getMinions());
     }
 
+    protected Character() {
+    }
+
     /**
      * Valida que el valor de vida esté en el rango permitido [0, 5].
      *
