@@ -42,6 +42,8 @@ public class User {
     public void setCharacter(Character character) { this.myCharacter = character; }
     public void setRole(String role) { this.role = role; }
     public void setVictories(int victories) { this.victories = victories; }
+    public void setName(String name) { this.name = name; }
+    public void setPassword(String password) { this.password = password; }
 
     public boolean isBlocked() { return isBlocked; }
     public void addVictory() { this.victories++; }

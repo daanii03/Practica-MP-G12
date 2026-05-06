@@ -8,7 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Clase responsable de gestionar la conexión y la estructura de la base de datos SQLite.
+ * Clase responsable de gestionar la conexión y la estructura de la base de
+ * datos SQLite.
  * Centraliza la creación de tablas, la inicialización de datos base (catálogo)
  * y proporciona conexiones al resto de la capa DAO.
  * 
@@ -17,7 +18,40 @@ import java.sql.Statement;
  */
 public class DatabaseManager {
 
-    private static final String DB_URL = "jdbc:sqlite:data/game_database.db";
+    private static String dbUrl = "jdbc:sqlite:data/game_database.db";
+    private static Connection keepAliveConnection;
+
+
+    /**
+     * Configura el manager para usar una base de datos en memoria compartida.
+     * Esto permite que las tablas persistan entre diferentes conexiones durante los tests.
+     */
+    public static void useTestDatabase() {
+        dbUrl = "jdbc:sqlite:file:testdb?mode=memory&cache=shared";
+        try {
+            // Mantenemos una conexión abierta para que la base de datos no se borre
+            if (keepAliveConnection == null || keepAliveConnection.isClosed()) {
+                keepAliveConnection = DriverManager.getConnection(dbUrl);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al mantener la conexión de test: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Permite volver a la base de datos real si fuera necesario.
+     */
+    public static void useDefaultDatabase() {
+        dbUrl = "jdbc:sqlite:data/game_database.db";
+        try {
+            if (keepAliveConnection != null && !keepAliveConnection.isClosed()) {
+                keepAliveConnection.close();
+                keepAliveConnection = null;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al cerrar la conexión de test: " + e.getMessage());
+        }
+    }
 
     /**
      * Obtiene una conexión a la base de datos.
@@ -26,7 +60,7 @@ public class DatabaseManager {
      * @throws SQLException si ocurre un error al conectar
      */
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(DB_URL);
+        return DriverManager.getConnection(dbUrl);
     }
 
     /**
@@ -136,7 +170,7 @@ public class DatabaseManager {
                 + ");";
 
         try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
 
             stmt.execute(sqlUsuarios);
             stmt.execute(sqlPersonajes);
@@ -163,8 +197,8 @@ public class DatabaseManager {
     private static void seedCatalog(Connection conn) {
         String checkSql = "SELECT COUNT(*) FROM catalogo_equipo";
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(checkSql)) {
-            
+                ResultSet rs = stmt.executeQuery(checkSql)) {
+
             if (rs.next() && rs.getInt(1) > 0) {
                 return; // Ya hay datos
             }
@@ -173,11 +207,11 @@ public class DatabaseManager {
             try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
                 // 5 ARMAS
                 String[][] weapons = {
-                    {"Espada Celestial", "3", "1", "1"},
-                    {"Daga de las Sombras", "2", "0", "1"},
-                    {"Hacha de Guerra Pesada", "3", "0", "0"},
-                    {"Arco de Cazador", "2", "1", "0"},
-                    {"Cuchillo de Plata", "1", "1", "1"}
+                        { "Espada Celestial", "3", "1", "1" },
+                        { "Daga de las Sombras", "2", "0", "1" },
+                        { "Hacha de Guerra Pesada", "3", "0", "0" },
+                        { "Arco de Cazador", "2", "1", "0" },
+                        { "Cuchillo de Plata", "1", "1", "1" }
                 };
                 for (String[] w : weapons) {
                     pstmt.setString(1, w[0]);
@@ -190,11 +224,11 @@ public class DatabaseManager {
 
                 // 5 ARMADURAS
                 String[][] armors = {
-                    {"Armadura de Placas de Ébano", "0", "3"},
-                    {"Cota de Malla Reforzada", "0", "2"},
-                    {"Capa de Invisibilidad", "1", "2"},
-                    {"Escudo de Roble Antiguo", "0", "2"},
-                    {"Manto de Sangre", "2", "1"}
+                        { "Armadura de Placas de Ébano", "0", "3" },
+                        { "Cota de Malla Reforzada", "0", "2" },
+                        { "Capa de Invisibilidad", "1", "2" },
+                        { "Escudo de Roble Antiguo", "0", "2" },
+                        { "Manto de Sangre", "2", "1" }
                 };
                 for (String[] a : armors) {
                     pstmt.setString(1, a[0]);
