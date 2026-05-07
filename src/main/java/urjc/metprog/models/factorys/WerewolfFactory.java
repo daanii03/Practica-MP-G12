@@ -52,14 +52,11 @@ public class WerewolfFactory extends CharacterFactory{
 
         GiftCatalogue[] giftCatalogue = GiftCatalogue.values();
 
-
+        CharacterBuilder characterBuilder = new CharacterBuilder();
 
         int randomIndex = random.nextInt(giftCatalogue.length);
 
         Gift gift = giftCatalogue[randomIndex].generateGift();
-
-        Weakness weakness;
-        Strength strength;
 
         WeaknessCatalogue[] weaknessCatalogue = WeaknessCatalogue.values();
         StrengthCatalogue[] strengthCatalogue = StrengthCatalogue.values();
@@ -67,30 +64,22 @@ public class WerewolfFactory extends CharacterFactory{
 
         randomIndex = random.nextInt(6,weaknessCatalogue.length + 1);
 
-        if (randomIndex == weaknessCatalogue.length + 1)
-            weakness = null;
-        else
-            weakness = weaknessCatalogue[randomIndex].generateWeakness();
+        if (randomIndex != weaknessCatalogue.length)
+            characterBuilder.addWeakness(weaknessCatalogue[randomIndex].generateWeakness());
 
         randomIndex = random.nextInt(6,weaknessCatalogue.length +1);
 
-        if (randomIndex == weaknessCatalogue.length)
-            strength = null;
-        else
-            strength = strengthCatalogue[randomIndex].generateStrength();
+        if (randomIndex != weaknessCatalogue.length)
+            characterBuilder.addStrength(strengthCatalogue[randomIndex].generateStrength());
 
 
-
-        CharacterBuilder characterBuilder = new CharacterBuilder();
 
         characterBuilder.id(id)
                 .name(name)
                 .specialSkill(gift)
                 .life(5)
                 .power(5)
-                .inventory(new Inventory())
-                .addWeakness(weakness)
-                .addStrength(strength);
+                .inventory(new Inventory());
 
         return new Werewolf(characterBuilder);
     }

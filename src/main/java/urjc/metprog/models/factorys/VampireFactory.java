@@ -56,35 +56,26 @@ public class VampireFactory extends CharacterFactory {
 
         Discipline randomDiscipline = options[randomIndex].generateDiscipline();
 
-        Weakness weakness;
-        Strength strength;
-
         WeaknessCatalogue[] weaknessCatalogue = WeaknessCatalogue.values();
         StrengthCatalogue[] strengthCatalogue = StrengthCatalogue.values();
 
 
         randomIndex = random.nextInt(3,7);
 
-        if (randomIndex == 6)
-            weakness = null;
-        else
-            weakness = weaknessCatalogue[randomIndex].generateWeakness();
+        if (randomIndex != 6)
+            characterBuilder.addWeakness(weaknessCatalogue[randomIndex].generateWeakness());
 
         randomIndex = random.nextInt(3,7);
 
-        if (randomIndex == 6)
-            strength = null;
-        else
-            strength = strengthCatalogue[randomIndex].generateStrength();
+        if (randomIndex != 6)
+            characterBuilder.addStrength(strengthCatalogue[randomIndex].generateStrength());
 
         characterBuilder.id(id)
                 .name(name)
                 .specialSkill(randomDiscipline)
                 .life(5)
                 .power(5)
-                .inventory(new Inventory())
-                .addWeakness(weakness)
-                .addStrength(strength);
+                .inventory(new Inventory());
 
 
         return new Vampire(characterBuilder);

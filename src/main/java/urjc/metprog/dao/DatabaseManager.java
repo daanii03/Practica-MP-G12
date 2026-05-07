@@ -183,9 +183,6 @@ public class DatabaseManager {
 
             seedCatalog(conn);
 
-            System.out.println("Tablas inicializadas correctamente (usuarios, personajes, " +
-                    "equipamiento, esbirros, modificadores, desafios, catalogo, desafios_pendientes).");
-
         } catch (SQLException e) {
             System.err.println("Error al inicializar la base de datos: " + e.getMessage());
         }

@@ -65,17 +65,13 @@ public class HunterFactory extends CharacterFactory {
 
         randomIndex = random.nextInt(0,4);
 
-        if (randomIndex == 3)
-            weakness = null;
-        else
-            weakness = weaknessCatalogue[randomIndex].generateWeakness();
+        if (randomIndex != 3)
+            characterBuilder.addWeakness(weaknessCatalogue[randomIndex].generateWeakness());
 
         randomIndex = random.nextInt(0,4);
 
-        if (randomIndex == 3)
-            strength = null;
-        else
-            strength = strengthCatalogue[randomIndex].generateStrength();
+        if (randomIndex != 3)
+            characterBuilder.addStrength(strengthCatalogue[randomIndex].generateStrength());
 
 
         characterBuilder.id(id)
@@ -83,9 +79,7 @@ public class HunterFactory extends CharacterFactory {
                 .life(5)
                 .power(5)
                 .specialSkill(randomTalent)
-                .inventory(new Inventory())
-                .addWeakness(weakness)
-                .addStrength(strength);
+                .inventory(new Inventory());
 
         return new Hunter(characterBuilder);
     }
