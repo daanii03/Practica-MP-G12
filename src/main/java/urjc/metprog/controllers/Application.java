@@ -45,24 +45,20 @@ public class Application {
         reloadActiveChallengesFromDb();
     }
 
-    //NO BORRAR LOS SYSTEM.PRINT
     private void reloadActiveChallengesFromDb() {
         List<String[]> rows = challengeDao.getPendingChallengesFromDb();
-        System.out.println("DEBUG - Desafíos cargados de BD: " + rows.size());
         for (String[] row : rows) {
-            System.out.println("DEBUG - Desafío: " + row[0] + " vs " + row[1] + " estado: " + row[3]);
+
 
             User challenger = userManager.getUserByNick(row[0]);
             User challenged = userManager.getUserByNick(row[1]);
-            System.out.println("DEBUG - challenger encontrado: " + (challenger != null));
-            System.out.println("DEBUG - challenged encontrado: " + (challenged != null));
+
 
             if (challenger == null || challenged == null) continue;
 
             Character challengerChar = characterManager.getCharacterByUser(row[0]);
             Character challengedChar = characterManager.getCharacterByUser(row[1]);
-            System.out.println("DEBUG - challengerChar encontrado: " + (challengerChar != null));
-            System.out.println("DEBUG - challengedChar encontrado: " + (challengedChar != null));
+
 
             if (challengerChar == null || challengedChar == null) continue;
 
@@ -74,13 +70,11 @@ public class Application {
                 challenge.validate(new HashMap<>());
             }
             ChallengeManager.getInstance().save(challenge);
-            System.out.println("DEBUG - Desafío añadido al ChallengeManager");
+
         }
     }
 
-    // ==========================================
     // MÉTODOS DE GESTIÓN DE USUARIOS
-    // ==========================================
 
     /**
      * Intenta iniciar sesión en el sistema.
@@ -146,9 +140,7 @@ public class Application {
         return currentUser;
     }
 
-    // ==========================================
     // MÉTODOS DE GESTIÓN DE PERSONAJES
-    // ==========================================
 
     /**
      * Crea un personaje para el usuario actual.
@@ -190,9 +182,7 @@ public class Application {
         return characterManager.getCharacterByUser(currentUser.getNick());
     }
 
-    // ==========================================
     // MÉTODOS DE GESTIÓN DE EQUIPAMIENTO
-    // ==========================================
 
     /**
      * Comprueba que el usuario tiene sesión y personaje, y devuelve el personaje.
@@ -296,9 +286,8 @@ public class Application {
         characterManager.changeActiveEquipment(currentUser.getNick(), weapons, armor);
     }
 
-    // ==========================================
     // MÉTODOS DE ADMINISTRACIÓN (OPERADOR)
-    // ==========================================
+
 
     /**
      * Obtiene todos los personajes de la base de datos con sus dueños.
@@ -353,9 +342,7 @@ public class Application {
         characterManager.removeArmorFromInventory(ownerNick, armor);
     }
 
-    // ==========================================
     // OTROS MÉTODOS GENERALES
-    // ==========================================
 
     
     /**
@@ -365,9 +352,9 @@ public class Application {
         return userManager.getRanking();
     }
 
-    // ==========================================
+
     // MÉTODOS DE GESTIÓN DE ESBIRROS
-    // ==========================================
+
 
     /**
      * Obtiene la lista de esbirros del personaje del usuario actual.
@@ -414,9 +401,9 @@ public class Application {
         characterManager.deleteMinion(ownerNick, minionIndex);
     }
 
-    // ==========================================
+
     // MÉTODOS DE DESAFÍOS
-    // ==========================================
+
 
     /**
      * El usuario actual desafía al jugador con el nick indicado.
@@ -482,8 +469,7 @@ public class Application {
         // Al final de challengePlayer(), antes del return:
         Challenge challenge = new Challenge(currentUser, challenged, goldBet);
         challengeDao.savePendingChallenge(challenge);
-        System.out.println("DEBUG - Desafío guardado en BD: " + challenge.getChallenger().getNick()); // <-- añade esto
-        challengeDao.savePendingChallenge(challenge); // <-- AÑADE ESTO
+        ChallengeManager.getInstance().save(challenge);
         return challenge;
     }
 
@@ -495,6 +481,9 @@ public class Application {
      */
     public boolean hasPendingChallenge() {
         if (currentUser == null) return false;
+
+        refreshChallengesInMemory();
+
         return ChallengeManager.getInstance()
                 .findPublishedChallengeForUser(currentUser)
                 .isPresent();
@@ -508,6 +497,9 @@ public class Application {
      */
     public Challenge getPendingChallengeForCurrentUser() {
         if (currentUser == null) return null;
+
+        refreshChallengesInMemory();
+
         return ChallengeManager.getInstance()
                 .findPublishedChallengeForUser(currentUser)
                 .orElse(null);
@@ -520,6 +512,7 @@ public class Application {
      * @return Lista de desafíos en estado PENDING_VALIDATION.
      */
     public List<Challenge> getPendingChallengesForValidation() {
+        refreshChallengesInMemory();
         return ChallengeManager.getInstance().findPendingValidation();
     }
 
@@ -533,7 +526,7 @@ public class Application {
     public void validateChallenge(Challenge challenge, Map<String, Integer> activeModifiers) {
         userManager.validateChallenge(challenge, activeModifiers);
         challengeDao.updatePendingChallengeStatus(
-                challenge.getChallenger().getNick(), "PUBLISHED"); // <-- AÑADE
+                challenge.getChallenger().getNick(), "PUBLISHED");
     }
 
     /**
@@ -542,7 +535,7 @@ public class Application {
     public void rejectInvalidChallengeAndBlock(Challenge challenge) {
         userManager.rejectInvalidChallengeAndBlock(challenge);
         challengeDao.updatePendingChallengeStatus(
-                challenge.getChallenger().getNick(), "REJECTED"); // <-- AÑADE
+                challenge.getChallenger().getNick(), "REJECTED");
     }
 
     /**
@@ -637,9 +630,9 @@ public class Application {
         return challengeDao.getChallengeHistoryByUser(userId);
     }
 
-    // ==========================================
+
     // MÉTODO AUXILIAR PRIVADO
-    // ==========================================
+
 
 
     /**
@@ -651,5 +644,13 @@ public class Application {
      */
     private int getUserIdByNick(String nick) {
         return new UserDaoImpl().getUserId(nick);
+    }
+    private void refreshChallengesInMemory() {
+        // Vaciamos la memoria RAM actual
+        ChallengeManager.getInstance().findAll().forEach(c ->
+                ChallengeManager.getInstance().delete(c)
+        );
+        // Volvemos a cargar desde SQLite
+        reloadActiveChallengesFromDb();
     }
 }
